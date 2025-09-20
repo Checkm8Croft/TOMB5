@@ -9,19 +9,20 @@ add_definitions(-D_XOPEN_SOURCE=700 -D_POSIX_C_SOURCE=200809L)
 
 # Include directories
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/tomb5
-    ${CMAKE_CURRENT_SOURCE_DIR}/tomb5/game
-    ${CMAKE_CURRENT_SOURCE_DIR}/tomb5/global
-    ${CMAKE_CURRENT_SOURCE_DIR}/tomb5/specific
+    ${CMAKE_CURRENT_SOURCE_DIR}/TOMB5
+    ${CMAKE_CURRENT_SOURCE_DIR}/TOMB5/game
+    ${CMAKE_CURRENT_SOURCE_DIR}/TOMB5/global
+    ${CMAKE_CURRENT_SOURCE_DIR}/TOMB5/specific
 )
 
 # Source files
 file(GLOB_RECURSE SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/tomb5/game/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tomb5/global/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tomb5/specific/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tomb5/tomb5/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/TOMB5/game/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/TOMB5/global/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/TOMB5/specific/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/TOMB5/tomb5/*.cpp"
 )
+message(STATUS "SOURCES=${SOURCES}")
 
 # Executable
 add_executable(tomb5 ${SOURCES})

@@ -1,14 +1,14 @@
 #pragma once
 #include "../global/types.h"
 
-void setXY3(D3DTLVERTEX* v, long x1, long y1, long x2, long y2, long x3, long y3, long z, short* clip);
-void setXY4(D3DTLVERTEX* v, long x1, long y1, long x2, long y2, long x3, long y3, long x4, long y4, long z, short* clip);
-void aSetXY4(D3DTLVERTEX* v, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float z, short* clip);
-void setXYZ3(D3DTLVERTEX* v, long x1, long y1, long z1, long x2, long y2, long z2, long x3, long y3, long z3, short* clip);
-void setXYZ4(D3DTLVERTEX* v, long x1, long y1, long z1, long x2, long y2, long z2, long x3, long y3, long z3, long x4, long y4, long z4, short* clip);
-void ClipCheckPoint(D3DTLVERTEX* v, float x, float y, float z, short* clip);
-void aTransformPerspSV(SVECTOR* vec, D3DTLVERTEX* v, short* c, long nVtx, long col);
-void AddPolyLine(D3DTLVERTEX* vtx, TEXTURESTRUCT* tex, float p);
+void setXY3(GLVERTEX* v, long x1, long y1, long x2, long y2, long x3, long y3, long z, short* clip);
+void setXY4(GLVERTEX* v, long x1, long y1, long x2, long y2, long x3, long y3, long x4, long y4, long z, short* clip);
+void aSetXY4(GLVERTEX* v, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float z, short* clip);
+void setXYZ3(GLVERTEX* v, long x1, long y1, long z1, long x2, long y2, long z2, long x3, long y3, long z3, short* clip);
+void setXYZ4(GLVERTEX* v, long x1, long y1, long z1, long x2, long y2, long z2, long x3, long y3, long z3, long x4, long y4, long z4, short* clip);
+void ClipCheckPoint(GLVERTEX* v, float x, float y, float z, short* clip);
+void aTransformPerspSV(SVECTOR* vec, GLVERTEX* v, short* c, long nVtx, long col);
+void AddPolyLine(GLVERTEX* vtx, TEXTURESTRUCT* tex, float p);
 bool ClipLine(long& x1, long& y1, long z1, long& x2, long& y2, long z2, long xMin, long yMin, long w, long h);
 void aInitFX();
 void ClearFX();

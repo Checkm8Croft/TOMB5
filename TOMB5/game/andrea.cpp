@@ -605,8 +605,8 @@ void DrawPortalDoor(ITEM_INFO* item)
 	CVECTOR* orgb;
 	SPRITESTRUCT* sprite;
 	TEXTURESTRUCT tex;
-	D3DTLVERTEX v[64];
-	D3DTLVERTEX vtx[4];
+	GLVERTEX v[64];
+	GLVERTEX vtx[4];
 	FVECTOR points[64];
 	short* rand;
 	float fx, fy, fz, zv, y, z, s;

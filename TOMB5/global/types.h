@@ -456,6 +456,14 @@ struct ROOMLET
 	long* pPrelight;
 };
 
+struct GLVERTEX {
+    float sx, sy, sz;      // screen coordinates
+    float rhw;             // reciprocal homogeneous w
+    ulong color;           // packed RGBA
+    ulong specular;        // specular color (unused, compatibilità)
+    float tu, tv;          // texture coordinates
+};
+
 struct SPHERE
 {
 	long x;
@@ -1739,7 +1747,6 @@ InputDevice* Keyboard;
 InputDevice* Joystick;
 typedef float D3DVALUE;
 typedef struct { int caps; int minWidth, minHeight; int maxWidth, maxHeight; } DDCaps;
-DDCaps;
 typedef struct { char driverName[256]; char description[256]; unsigned int vendorId; } DDDeviceIdentifier;
 DDDeviceIdentifier DDIdentifier;
 struct DXDIRECTDRAWINFO
@@ -1748,7 +1755,6 @@ struct DXDIRECTDRAWINFO
 	char About[256];
 	GUID* lpGuid;
 	GUID Guid;
-	DDCaps DDCaps;
 	DDDeviceIdentifier DDIdentifier;
 	long nDisplayModes;
 	DXDISPLAYMODE* DisplayModes;
