@@ -1,24 +1,46 @@
 #pragma once
 #include "../global/types.h"
+#include "../global/compat.h"
+
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+
+// Simuliamo i driver ACM con SDL2
+typedef void* HACMDRIVER;
+typedef int HACMDRIVERID;
+typedef unsigned long DWORD_PTR;
+
+// --- Funzioni principali (da rimappare) ---
 
 void S_CDPlay(long track, long mode);
 void S_CDStop();
 void S_CDFade(long n);
 void S_StartSyncedAudio(long track);
+
 void ACMSetVolume();
 void OpenStreamFile(char* name);
 void GetADPCMData();
 void ACMEmulateCDPlay(long track, long mode);
-BOOL __stdcall ACMEnumCallBack(HACMDRIVERID hadid, DWORD_PTR dwInstance, DWORD fdwSupport);
+
+// Callback fittizia (non usata realmente in SDL2)
+BOOL ACMEnumCallBack(HACMDRIVERID hadid, DWORD_PTR dwInstance, DWORD fdwSupport);
+
 long ACMSetupNotifications();
 void FillADPCMBuffer(char* p, long track);
 long ACMHandleNotifications();
+
 bool ACMInit();
 void ACMClose();
 
+// --- Variabili globali ---
+
 extern HACMDRIVER hACMDriver;
-extern uchar* wav_file_buffer;
-extern uchar* ADPCMBuffer;
+extern unsigned char* wav_file_buffer;
+extern unsigned char* ADPCMBuffer;
 extern bool acm_ready;
 extern long XATrack;
 extern long XAFlag;
+
+// --- Nuove strutture per SDL2 ---
+extern Mix_Music* current_music;
+extern Mix_Chunk* current_sound;

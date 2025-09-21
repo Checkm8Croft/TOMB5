@@ -8,10 +8,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
-#include <string>
-#include <vector>
-#include <memory>
-#include <iostream>
 
 // Macros utili per compatibilità
 #define _USE_MATH_DEFINES

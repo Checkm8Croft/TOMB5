@@ -2593,4 +2593,11 @@ struct tomb5_options	//only bools or ulongs because that's what registry likes
 	bool static_lighting;		//on off
 	ulong uw_dust;				//1-> off, 2-> original, 3-> TR4
 };
+
+
+typedef void* HBITMAP;    // un puntatore generico
+typedef const char* LPCSTR;
+
+typedef int HRESULT;       // se serve per i return code
+#define S_OK 0
 #pragma pack(pop)
