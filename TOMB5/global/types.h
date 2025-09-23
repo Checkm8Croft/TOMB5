@@ -8,6 +8,7 @@
 #include <GL/gl.h>
 #endif
 #include <pthread.h>
+#include <stdint.h>
 #pragma pack(push, 1)
 /*macros*/
 #define SQUARE(x) ((x)*(x))
@@ -2593,7 +2594,17 @@ struct tomb5_options	//only bools or ulongs because that's what registry likes
 	bool static_lighting;		//on off
 	ulong uw_dust;				//1-> off, 2-> original, 3-> TR4
 };
+typedef struct {
+    uint16_t wFormatTag;        // formato audio (PCM = 1)
+    uint16_t nChannels;         // numero di canali (1 = mono, 2 = stereo)
+    uint32_t nSamplesPerSec;    // frequenza (es: 44100 Hz)
+    uint32_t nAvgBytesPerSec;   // byte per secondo (per buffering)
+    uint16_t nBlockAlign;       // dimensione di un frame (channels * bytesPerSample)
+    uint16_t wBitsPerSample;    // bits per campione (8, 16, 24, 32)
+    uint16_t cbSize;            // extra info (per formati compressi, 0 per PCM)
+} WAVEFORMATEX;
 
+typedef WAVEFORMATEX* LPWAVEFORMATEX;
 
 typedef void* HBITMAP;    // un puntatore generico
 typedef const char* LPCSTR;

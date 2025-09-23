@@ -23,6 +23,6 @@ void DXFreeSounds();
 long S_SoundSampleIsPlaying(long num);
 void S_SoundSetPanAndVolume(long num, short pan, ushort volume);
 void S_SoundSetPitch(long num, long pitch);
-bool DXCreateSample(long num, LPWAVEFORMATEX format, LPVOID data, ulong bytes);
+bool DXCreateSample(long num, LPWAVEFORMATEX format, void* data, ulong bytes);
 
 extern char* samples_buffer;
