@@ -9,6 +9,7 @@
 #endif
 #include <pthread.h>
 #include <stdint.h>
+#include <SDL2/SDL_scancode.h>
 #pragma pack(push, 1)
 /*macros*/
 #define SQUARE(x) ((x)*(x))
@@ -2612,3 +2613,33 @@ typedef const char* LPCSTR;
 typedef int HRESULT;       // se serve per i return code
 #define S_OK 0
 #pragma pack(pop)
+struct D3DMATRIX { float _11,_12,_13,_14; float _21,_22,_23,_24; float _31,_32,_33,_34; float _41,_42,_43,_44; }; typedef D3DMATRIX* LPD3DMATRIX;
+struct D3DVECTOR { float x, y, z; }; typedef D3DVECTOR* LPD3DVECTOR;
+typedef GLVERTEX D3DTLVERTEX;
+typedef GLVERTEX* LPD3DTLVERTEX;
+typedef D3DCOLOR* LPD3DCOLOR;
+typedef float* LPD3DVALUE;
+
+#define DIK_C     SDL_SCANCODE_C
+#define DIK_U     SDL_SCANCODE_U
+#define DIK_T     SDL_SCANCODE_T
+#define DIK_S     SDL_SCANCODE_S
+#define DIK_LALT  SDL_SCANCODE_LALT
+#define DIK_RALT  SDL_SCANCODE_RALT
+#define DIK_D     SDL_SCANCODE_D
+#define DIK_O     SDL_SCANCODE_O
+#define DIK_Z     SDL_SCANCODE_Z
+#define DIK_Y     SDL_SCANCODE_Y
+#define DIK_G     SDL_SCANCODE_G
+#define DIK_N     SDL_SCANCODE_N
+#define DIK_B     SDL_SCANCODE_B
+#define DIK_I     SDL_SCANCODE_I
+#define DIK_E     SDL_SCANCODE_E
+#define DIK_M     SDL_SCANCODE_M
+#define DIK_K     SDL_SCANCODE_K
+#define DIK_P     SDL_SCANCODE_P
+#define DIK_H     SDL_SCANCODE_H
+#define DIK_A     SDL_SCANCODE_A
+#define DIK_L     SDL_SCANCODE_L
+#define DIK_ESC   SDL_SCANCODE_ESCAPE
+#define DIK_ESCAPE SDL_SCANCODE_ESCAPE

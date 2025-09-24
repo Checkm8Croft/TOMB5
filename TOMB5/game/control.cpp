@@ -261,6 +261,9 @@ long ControlPhase(long nframes, long demo_mode)
 
 			input &= IN_LOOK;
 		}
+#ifndef DIK_ESCAPE
+#define DIK_ESCAPE 0x01
+#endif
 
 		if (cutseq_trig)
 		{
@@ -3417,7 +3420,7 @@ long RayBoxIntersect(PHD_VECTOR* min, PHD_VECTOR* max, PHD_VECTOR* origin, PHD_V
 		Coord->x = planes[0];
 	else
 	{
-		Coord->x = origin->x + (((__int64)dir->x * (__int64)dists[plane]) >> 16);
+		Coord->x = origin->x + (((int64_t)dir->x * (int64_t)dists[plane]) >> 16);
 
 		if ((!quad[0] && Coord->x < min->x) || (quad[0] == 1 && Coord->x > max->x))
 			return 0;
@@ -3427,7 +3430,7 @@ long RayBoxIntersect(PHD_VECTOR* min, PHD_VECTOR* max, PHD_VECTOR* origin, PHD_V
 		Coord->y = planes[1];
 	else
 	{
-		Coord->y = origin->y + (((__int64)dir->y * (__int64)dists[plane]) >> 16);
+		Coord->y = origin->y + (((int64_t)dir->y * (int64_t)dists[plane]) >> 16);
 
 		if ((!quad[1] && Coord->y < min->y) || (quad[1] == 1 && Coord->y > max->y))
 			return 0;
@@ -3437,7 +3440,7 @@ long RayBoxIntersect(PHD_VECTOR* min, PHD_VECTOR* max, PHD_VECTOR* origin, PHD_V
 		Coord->z = planes[2];
 	else
 	{
-		Coord->z = origin->z + (((__int64)dir->z * (__int64)dists[plane]) >> 16);
+		Coord->z = origin->z + (((int64_t)dir->z * (int64_t)dists[plane]) >> 16);
 
 		if ((!quad[2] && Coord->z < min->z) || (quad[2] == 1 && Coord->z > max->z))
 			return 0;

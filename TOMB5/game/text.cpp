@@ -16,52 +16,52 @@ uchar ScaleFlag;
 
 char AccentTable[46][2] =
 {
-	{'{', ' '},		//Á
-	{'u', '^'},		//¸
-	{'e', '\\'},	//È
-	{'a', ']'},		//‚
-	{'a', '^'},		//‰
-	{'a', '['},		//‡
-	{'a', '\\'},	//·
-	{'{', ' '},		//Á
-	{'e', ']'},		//Í
-	{'e', '^'},		//Î
-	{'e', '['},		//Ë
-	{'|', '^'},		//Ô
-	{'|', ']'},		//Ó
-	{'|', '['},		//Ï
-	{'A', '^'},		//ƒ
-	{'A', ']'},		//¬
-	{'E', '\\'},	//…
-	{'A', '\\'},	//¡			//NEW
+	{'{', ' '},		//ÔøΩ
+	{'u', '^'},		//ÔøΩ
+	{'e', '\\'},	//ÔøΩ
+	{'a', ']'},		//ÔøΩ
+	{'a', '^'},		//ÔøΩ
+	{'a', '['},		//ÔøΩ
+	{'a', '\\'},	//ÔøΩ
+	{'{', ' '},		//ÔøΩ
+	{'e', ']'},		//ÔøΩ
+	{'e', '^'},		//ÔøΩ
+	{'e', '['},		//ÔøΩ
+	{'|', '^'},		//ÔøΩ
+	{'|', ']'},		//ÔøΩ
+	{'|', '['},		//ÔøΩ
+	{'A', '^'},		//ÔøΩ
+	{'A', ']'},		//ÔøΩ
+	{'E', '\\'},	//ÔøΩ
+	{'A', '\\'},	//ÔøΩ			//NEW
 	{' ', ' '},		//empty
-	{'o', ']'},		//Ù
-	{'o', '^'},		//ˆ
-	{'o', '['},		//Ú
-	{'u', ']'},		//˚
-	{'u', '['},		//˘
-	{'y', '^'},		//ˇ
-	{'O', '^'},		//÷
-	{'U', '^'},		//‹
+	{'o', ']'},		//ÔøΩ
+	{'o', '^'},		//ÔøΩ
+	{'o', '['},		//ÔøΩ
+	{'u', ']'},		//ÔøΩ
+	{'u', '['},		//ÔøΩ
+	{'y', '^'},		//ÔøΩ
+	{'O', '^'},		//ÔøΩ
+	{'U', '^'},		//ÔøΩ
 	{' ', ' '},		//empty
-	{'O', '\\'},	//”
-	{' ', ' '},		//empty
-	{' ', ' '},		//empty
-	{' ', ' '},		//empty
-	{'a', '\\'},	//·
-	{'|', '\\'},	//Ì
-	{'o', '\\'},	//Û
-	{'u', '\\'},	//˙
-	{'n', '_'},		//Ò
-	{'N', '_'},		//—
-	{' ', ' '},		//empty
-	{' ', ' '},		//empty
-	{'}', ' '},		//ø
+	{'O', '\\'},	//ÔøΩ
 	{' ', ' '},		//empty
 	{' ', ' '},		//empty
 	{' ', ' '},		//empty
+	{'a', '\\'},	//ÔøΩ
+	{'|', '\\'},	//ÔøΩ
+	{'o', '\\'},	//ÔøΩ
+	{'u', '\\'},	//ÔøΩ
+	{'n', '_'},		//ÔøΩ
+	{'N', '_'},		//ÔøΩ
 	{' ', ' '},		//empty
-	{'~', ' '}		//°
+	{' ', ' '},		//empty
+	{'}', ' '},		//ÔøΩ
+	{' ', ' '},		//empty
+	{' ', ' '},		//empty
+	{' ', ' '},		//empty
+	{' ', ' '},		//empty
+	{'~', ' '}		//ÔøΩ
 };
 
 #pragma warning(push)
@@ -69,16 +69,23 @@ char AccentTable[46][2] =
 #pragma warning(disable : 4309)
 static CVECTOR ShadeFromTo[10][2] =
 {
-	{ {128, 128, 128, 0}, {128, 128, 128, 0} },
-	{ {128, 128, 128, 0}, {128, 128, 128, 0} },
-	{ {128, 128, 128, 0}, {128, 128, 128, 0} },
-	{ {128, 0, 0, 0}, {64, 0, 0, 0} },
-	{ {0, 0, 160, 0}, {0, 0, 80, 0} },
-	{ {128, 128, 128, 0}, {16, 16, 16, 0} },
-	{ {192, 128, 64, 0}, {64, 16, 0, 0} },
-	{ {16, 16, 16, 0}, {128, 128, 128, 0} },
-	{ {224, 192, 0, 0}, {64, 32, 0, 0} },
-	{ {128, 0, 0, 0}, {64, 0, 0, 0} },
+	{ {static_cast<char>(128), static_cast<char>(128), static_cast<char>(128), 0}, 
+  {static_cast<char>(128), static_cast<char>(128), static_cast<char>(128), 0} },
+
+{ {static_cast<char>(128), static_cast<char>(128), static_cast<char>(128), 0}, 
+  {static_cast<char>(128), static_cast<char>(128), static_cast<char>(128), 0} },
+
+{ {static_cast<char>(128), static_cast<char>(128), static_cast<char>(128), 0}, 
+  {static_cast<char>(128), static_cast<char>(128), static_cast<char>(128), 0} },
+
+	{ {static_cast<char>(128), 0, 0, 0}, {64, 0, 0, 0} },
+{ {0, 0, static_cast<char>(160), 0}, {0, 0, 80, 0} },
+{ {static_cast<char>(128), static_cast<char>(128), static_cast<char>(128), 0}, {16, 16, 16, 0} },
+{ {static_cast<char>(192), static_cast<char>(128), 64, 0}, {64, 16, 0, 0} },
+{ {16, 16, 16, 0}, {static_cast<char>(128), static_cast<char>(128), static_cast<char>(128), 0} },
+{ {static_cast<char>(224), static_cast<char>(192), 0, 0}, {64, 32, 0, 0} },
+{ {static_cast<char>(128), 0, 0, 0}, {64, 0, 0, 0} },
+
 };
 #pragma warning(pop)
 
@@ -241,74 +248,40 @@ void DrawChar(long x, long y, ushort col, CHARDEF* def)
 
 static void AccentToCode(uchar& s)
 {
-	if (s == (uchar)'°')
-		s = 128 + 45;
-	else if (s == (uchar)'ø')
-		s = 128 + 40;
-	else if (s == (uchar)'—')
-		s = 128 + 37;
-	else if (s == (uchar)'Ò')
-		s = 128 + 36;
-	else if (s == (uchar)'˙')
-		s = 128 + 35;
-	else if (s == (uchar)'Û')
-		s = 128 + 34;
-	else if (s == (uchar)'Ì')
-		s = 128 + 33;
-	else if (s == (uchar)'·')
-		s = 128 + 32;
-	else if (s == (uchar)'”')
-		s = 128 + 28;
-	else if (s == (uchar)'‹')
-		s = 128 + 26;
-	else if (s == (uchar)'÷')
-		s = 128 + 25;
-	else if (s == (uchar)'ˇ')
-		s = 128 + 24;
-	else if (s == (uchar)'˘')
-		s = 128 + 23;
-	else if (s == (uchar)'˚')
-		s = 128 + 22;
-	else if (s == (uchar)'Ú')
-		s = 128 + 21;
-	else if (s == (uchar)'ˆ')
-		s = 128 + 20;
-	else if (s == (uchar)'Ù')
-		s = 128 + 19;
-	else if (s == (uchar)'¡')
-		s = 128 + 17;
-	else if (s == (uchar)'…')
-		s = 128 + 16;
-	else if (s == (uchar)'¬')
-		s = 128 + 15;
-	else if (s == (uchar)'ƒ')
-		s = 128 + 14;
-	else if (s == (uchar)'Ï')
-		s = 128 + 13;
-	else if (s == (uchar)'Ó')
-		s = 128 + 12;
-	else if (s == (uchar)'Ô')
-		s = 128 + 11;
-	else if (s == (uchar)'Ë')
-		s = 128 + 10;
-	else if (s == (uchar)'Î')
-		s = 128 + 9;
-	else if (s == (uchar)'Í')
-		s = 128 + 8;
-	else if (s == (uchar)'Á')
-		s = 128 + 0;
-	else if (s == (uchar)'·')
-		s = 128 + 6;
-	else if (s == (uchar)'‡')
-		s = 128 + 5;
-	else if (s == (uchar)'‰')
-		s = 128 + 4;
-	else if (s == (uchar)'‚')
-		s = 128 + 3;
-	else if (s == (uchar)'È')
-		s = 128 + 2;
-	else if (s == (uchar)'¸')
-		s = 128 + 1;
+    if (s == static_cast<uchar>(161))       s = 128 + 45; // ¬°
+    else if (s == static_cast<uchar>(191))  s = 128 + 40; // ¬ø
+    else if (s == static_cast<uchar>(209))  s = 128 + 37; // √ë
+    else if (s == static_cast<uchar>(241))  s = 128 + 36; // √±
+    else if (s == static_cast<uchar>(250))  s = 128 + 35; // √∫
+    else if (s == static_cast<uchar>(243))  s = 128 + 34; // √≥
+    else if (s == static_cast<uchar>(237))  s = 128 + 33; // √≠
+    else if (s == static_cast<uchar>(225))  s = 128 + 32; // √°
+    else if (s == static_cast<uchar>(211))  s = 128 + 28; // √ì
+    else if (s == static_cast<uchar>(220))  s = 128 + 26; // √ú
+    else if (s == static_cast<uchar>(214))  s = 128 + 25; // √ñ
+    else if (s == static_cast<uchar>(255))  s = 128 + 24; // √ø
+    else if (s == static_cast<uchar>(249))  s = 128 + 23; // √π
+    else if (s == static_cast<uchar>(251))  s = 128 + 22; // √ª
+    else if (s == static_cast<uchar>(242))  s = 128 + 21; // √≤
+    else if (s == static_cast<uchar>(246))  s = 128 + 20; // √∂
+    else if (s == static_cast<uchar>(244))  s = 128 + 19; // √¥
+    else if (s == static_cast<uchar>(193))  s = 128 + 17; // √Å
+    else if (s == static_cast<uchar>(201))  s = 128 + 16; // √â
+    else if (s == static_cast<uchar>(194))  s = 128 + 15; // √Ç
+    else if (s == static_cast<uchar>(196))  s = 128 + 14; // √Ñ
+    else if (s == static_cast<uchar>(236))  s = 128 + 13; // √¨
+    else if (s == static_cast<uchar>(238))  s = 128 + 12; // √Æ
+    else if (s == static_cast<uchar>(239))  s = 128 + 11; // √Ø
+    else if (s == static_cast<uchar>(232))  s = 128 + 10; // √®
+    else if (s == static_cast<uchar>(235))  s = 128 + 9;  // √´
+    else if (s == static_cast<uchar>(234))  s = 128 + 8;  // √™
+    else if (s == static_cast<uchar>(231))  s = 128 + 0;  // √ß
+    else if (s == static_cast<uchar>(225))  s = 128 + 6;  // √° (ripetuto)
+    else if (s == static_cast<uchar>(224))  s = 128 + 5;  // √†
+    else if (s == static_cast<uchar>(228))  s = 128 + 4;  // √§
+    else if (s == static_cast<uchar>(226))  s = 128 + 3;  // √¢
+    else if (s == static_cast<uchar>(233))  s = 128 + 2;  // √©
+    else if (s == static_cast<uchar>(252))  s = 128 + 1;  // √º
 }
 
 long GetStringLength(const char* string, long* top, long* bottom)

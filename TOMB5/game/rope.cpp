@@ -58,9 +58,9 @@ void CreateRope(ROPE_STRUCT* rope, PHD_VECTOR* pos, PHD_VECTOR* dir, long slengt
 
 	for (lp = 0; lp < 24; lp++)
 	{
-		rope->Segment[lp].x = __int64(rope->SegmentLength * lp) * dir->x >> 16;
-		rope->Segment[lp].y = __int64(rope->SegmentLength * lp) * dir->y >> 16;
-		rope->Segment[lp].z = __int64(rope->SegmentLength * lp) * dir->z >> 16;
+		rope->Segment[lp].x = uint64_t(rope->SegmentLength * lp) * dir->x >> 16;
+		rope->Segment[lp].y = uint64_t(rope->SegmentLength * lp) * dir->y >> 16;
+		rope->Segment[lp].z = uint64_t(rope->SegmentLength * lp) * dir->z >> 16;
 		rope->Velocity[lp].x = 0;
 		rope->Velocity[lp].y = 0;
 		rope->Velocity[lp].z = 0;
@@ -91,9 +91,9 @@ PHD_VECTOR* Normalise(PHD_VECTOR* v)
 
 	dist = phd_sqrt(abs(SQUARE(x) + SQUARE(y) + SQUARE(z)));
 	mod = 0x10000 / dist;
-	v->x = (__int64)mod * v->x >> 16;
-	v->y = (__int64)mod * v->y >> 16;
-	v->z = (__int64)mod * v->z >> 16;
+	v->x = (uint64_t)mod * v->x >> 16;
+	v->y = (uint64_t)mod * v->y >> 16;
+	v->z = (uint64_t)mod * v->z >> 16;
 	return v;
 }
 
@@ -276,9 +276,9 @@ void CalculateRope(ROPE_STRUCT* Rope)
 	
 		for (n = Pendulum->node; n >= 0; n--)
 		{
-			Rope->Segment[n].x = Rope->MeshSegment[n - 1].x + ((__int64)Rope->SegmentLength * dir.x >> 16);
-			Rope->Segment[n].y = Rope->MeshSegment[n - 1].y + ((__int64)Rope->SegmentLength * dir.y >> 16);
-			Rope->Segment[n].z = Rope->MeshSegment[n - 1].z + ((__int64)Rope->SegmentLength * dir.z >> 16);
+			Rope->Segment[n].x = Rope->MeshSegment[n - 1].x + (static_cast<uint64_t>(Rope->SegmentLength * n) * dir.x >> 16);
+			Rope->Segment[n].y = Rope->MeshSegment[n - 1].y + (static_cast<uint64_t>(Rope->SegmentLength * n) * dir.y >> 16);
+			Rope->Segment[n].z = Rope->MeshSegment[n - 1].z + (static_cast<uint64_t>(Rope->SegmentLength * n) * dir.z >> 16);
 			Rope->Velocity[n].x = 0;
 			Rope->Velocity[n].y = 0;
 			Rope->Velocity[n].z = 0;
@@ -359,15 +359,15 @@ void CalculateRope(ROPE_STRUCT* Rope)
 		Rope->MeshSegment[0].x = Rope->Segment[0].x;
 		Rope->MeshSegment[0].y = Rope->Segment[0].y;
 		Rope->MeshSegment[0].z = Rope->Segment[0].z;
-		Rope->MeshSegment[1].x = Rope->Segment[0].x + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[0].x >> 16);
-		Rope->MeshSegment[1].y = Rope->Segment[0].y + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[0].y >> 16);
-		Rope->MeshSegment[1].z = Rope->Segment[0].z + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[0].z >> 16);
-	
+		Rope->MeshSegment[1].x = Rope->Segment[0].x + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[0].x) >> 16);
+		Rope->MeshSegment[1].y = Rope->Segment[0].y + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[0].y) >> 16);
+		Rope->MeshSegment[1].z = Rope->Segment[0].z + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[0].z) >> 16);
+
 		for (n = 2; n < 24; n++)
 		{
-			Rope->MeshSegment[n].x = Rope->MeshSegment[n - 1].x + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[n - 1].x >> 16);
-			Rope->MeshSegment[n].y = Rope->MeshSegment[n - 1].y + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[n - 1].y >> 16);
-			Rope->MeshSegment[n].z = Rope->MeshSegment[n - 1].z + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[n - 1].z >> 16);
+			Rope->MeshSegment[n].x = Rope->MeshSegment[n - 1].x + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[n - 1].x) >> 16);
+			Rope->MeshSegment[n].y = Rope->MeshSegment[n - 1].y + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[n - 1].y) >> 16);
+			Rope->MeshSegment[n].z = Rope->MeshSegment[n - 1].z + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[n - 1].z) >> 16);
 		}
 	}
 	else
@@ -375,15 +375,15 @@ void CalculateRope(ROPE_STRUCT* Rope)
 		Rope->MeshSegment[Pendulum->node].x = Rope->Segment[Pendulum->node].x;
 		Rope->MeshSegment[Pendulum->node].y = Rope->Segment[Pendulum->node].y;
 		Rope->MeshSegment[Pendulum->node].z = Rope->Segment[Pendulum->node].z;
-		Rope->MeshSegment[Pendulum->node + 1].x = Rope->Segment[Pendulum->node].x + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[Pendulum->node].x >> 16);
-		Rope->MeshSegment[Pendulum->node + 1].y = Rope->Segment[Pendulum->node].y + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[Pendulum->node].y >> 16);
-		Rope->MeshSegment[Pendulum->node + 1].z = Rope->Segment[Pendulum->node].z + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[Pendulum->node].z >> 16);
-		
+		Rope->MeshSegment[Pendulum->node + 1].x = Rope->Segment[Pendulum->node].x + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[Pendulum->node].x) >> 16);
+		Rope->MeshSegment[Pendulum->node + 1].y = Rope->Segment[Pendulum->node].y + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[Pendulum->node].y) >> 16);
+		Rope->MeshSegment[Pendulum->node + 1].z = Rope->Segment[Pendulum->node].z + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[Pendulum->node].z) >> 16);
+
 		for (n = Pendulum->node + 1; n < 23; n++)
 		{
-			Rope->MeshSegment[n + 1].x = Rope->MeshSegment[n].x + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[n].x >> 16);
-			Rope->MeshSegment[n + 1].y = Rope->MeshSegment[n].y + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[n].y >> 16);
-			Rope->MeshSegment[n + 1].z = Rope->MeshSegment[n].z + ((__int64)Rope->SegmentLength * Rope->NormalisedSegment[n].z >> 16);
+			Rope->MeshSegment[n + 1].x = Rope->MeshSegment[n].x + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[n].x) >> 16);
+			Rope->MeshSegment[n + 1].y = Rope->MeshSegment[n].y + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[n].y) >> 16);
+			Rope->MeshSegment[n + 1].z = Rope->MeshSegment[n].z + (static_cast<uint64_t>(Rope->SegmentLength * Rope->NormalisedSegment[n].z) >> 16);
 		}
 		
 		for (n = 0; n < Pendulum->node; n++)
@@ -422,9 +422,9 @@ void SetPendulumVelocity(long x, long y, long z)
 	if (CurrentPendulum.node >> 1 < 12)
 	{
 		scale = 4096 / (24 - 2 * (CurrentPendulum.node >> 1)) * 256;
-		x = (__int64)scale * x >> 16;
-		y = (__int64)scale * y >> 16;
-		z = (__int64)scale * z >> 16;
+		x = (static_cast<int64_t>(scale) * x) >> 16;
+		y = (static_cast<int64_t>(scale) * y) >> 16;
+		z = (static_cast<int64_t>(scale) * z) >> 16;
 	}
 
 	CurrentPendulum.Velocity.x += x;
@@ -466,9 +466,9 @@ void ModelRigidRope(PHD_VECTOR* pa, PHD_VECTOR* pb, PHD_VECTOR* va, PHD_VECTOR* 
 	length = phd_sqrt(abs(SQUARE(d.x >> 16) + SQUARE(d.y >> 16) + SQUARE(d.z >> 16)));
 	scale = (length << 16) - rlength;
 	Normalise(&d);
-	delta.x = (__int64)scale * d.x >> 16;
-	delta.y = (__int64)scale * d.y >> 16;
-	delta.z = (__int64)scale * d.z >> 16;
+	delta.x = (static_cast<int64_t>(scale) * d.x) >> 16;
+	delta.y = (static_cast<int64_t>(scale) * d.y) >> 16;
+	delta.z = (static_cast<int64_t>(scale) * d.z) >> 16;
 	vb->x -= delta.x;
 	vb->y -= delta.y;
 	vb->z -= delta.z;
@@ -491,9 +491,9 @@ void ModelRigid(PHD_VECTOR* pa, PHD_VECTOR* pb, PHD_VECTOR* va, PHD_VECTOR* vb, 
 	length = phd_sqrt(abs(SQUARE(d.x >> 16) + SQUARE(d.y >> 16) + SQUARE(d.z >> 16)));
 	scale = ((length << 16) - rlength) >> 1;
 	Normalise(&d);
-	delta.x = (__int64)scale * d.x >> 16;
-	delta.y = (__int64)scale * d.y >> 16;
-	delta.z = (__int64)scale * d.z >> 16;
+	delta.x = (static_cast<int64_t>(scale) * d.x) >> 16;
+	delta.y = (static_cast<int64_t>(scale) * d.y) >> 16;
+	delta.z = (static_cast<int64_t>(scale) * d.z) >> 16;
 	va->x += delta.x;
 	va->y += delta.y;
 	va->z += delta.z;
@@ -725,9 +725,9 @@ void _Straighten(ROPE_STRUCT* rope, PHD_VECTOR* pos, PHD_VECTOR* dir, long sleng
 
 	for (n = 0; n < 24; n++)
 	{
-		rope->Segment[n].x = __int64(rope->SegmentLength * n) * dir->x >> 16;
-		rope->Segment[n].y = __int64(rope->SegmentLength * n) * dir->y >> 16;
-		rope->Segment[n].z = __int64(rope->SegmentLength * n) * dir->z >> 16;
+		rope->Segment[n].x = (static_cast<int64_t>(rope->SegmentLength) * n * dir->x) >> 16;
+		rope->Segment[n].y = (static_cast<int64_t>(rope->SegmentLength) * n * dir->y) >> 16;
+		rope->Segment[n].z = (static_cast<int64_t>(rope->SegmentLength) * n * dir->z) >> 16;
 		rope->Velocity[n].x = 0;
 		rope->Velocity[n].y = 0;
 		rope->Velocity[n].z = 0;

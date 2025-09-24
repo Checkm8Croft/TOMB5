@@ -86,6 +86,7 @@ static char fmv_to_play[2] = { 0, 0 };
 static char num_fmvs = 0;
 static char DEL_playingamefmv = 0;
 
+
 static CUTSEQ_SELECTOR cutsel[] =
 {
 	{0, 0, 0},
@@ -366,9 +367,9 @@ void DoGameflow()
 
 long TitleOptions()
 {
-	static __int64 selection = 1;
-	static __int64 selection_bak = 0;
-	__int64 flag, sel;
+	static u_int64_t selection = 1;
+	static u_int64_t selection_bak = 0;
+	u_int64_t flag, sel;
 	long nLevels, nFirst, lp;
 	long ret, n, load, cheat_jump, y;
 	static long load_or_new;
@@ -461,16 +462,16 @@ long TitleOptions()
 		{
 			y += font_height;
 
-			if (selection & (1i64 << (lp - 1)))
+			if (selection & (1LL << (lp - 1)))
 				PrintString(phd_centerx, y, 1, SCRIPT_TEXT(gfLevelNames[lp]), FF_CENTER);
 			else
 				PrintString(phd_centerx, y, available_levels[lp - 1] ? 2 : 3, SCRIPT_TEXT(gfLevelNames[lp]), FF_CENTER);
 
-			if (selection & (1i64 << (lp - 1)))
+			if (selection & (1LL << (lp - 1)))
 				selected_level = lp - 1;
 		}
 
-		flag = 1i64 << (Gameflow->nLevels - 2);
+		flag = 1LL << (Gameflow->nLevels - 2);
 		font_height = default_font_height;
 		break;
 

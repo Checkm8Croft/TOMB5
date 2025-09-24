@@ -33,8 +33,6 @@ typedef float D3DVALUE;
 #endif
 
 // Stub structures Direct3D minimi
-struct D3DVECTOR { float x, y, z; };
-struct D3DMATRIX { float _11,_12,_13,_14; float _21,_22,_23,_24; float _31,_32,_33,_34; float _41,_42,_43,_44; };
 
 // Stub per audio/macOS/Linux (da sostituire con SDL2/ALSA/OpenAL)
 struct DSOUND_BUFFER {};
