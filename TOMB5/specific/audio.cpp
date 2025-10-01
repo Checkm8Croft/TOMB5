@@ -3,8 +3,8 @@
 #include "audio.h"
 
 static Mix_Music* currentMusic = nullptr;
-static bool acm_ready = false;
-
+bool acm_ready = false;
+int MusicVolume = 100;
 bool ACMInit()
 {
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {

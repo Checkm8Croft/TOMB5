@@ -10,7 +10,7 @@ long S_GetObjectBounds(short* bounds);
 void S_AnimateTextures(long n);
 long aCheckMeshClip(MESH_DATA* mesh);
 HRESULT DDCopyBitmap(Surface surf, HBITMAP hbm, long x, long y, long dx, long dy);
-HRESULT _LoadBitmap(Surface surf, LPCSTR name);
+int _LoadBitmap(DrawDevice surf, const char* name);
 void do_boot_screen(long language);
 void aCalcColorSplit(long col, long* pC, long* pS);
 long S_DumpScreen();

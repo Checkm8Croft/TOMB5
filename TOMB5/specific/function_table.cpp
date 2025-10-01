@@ -20,82 +20,85 @@ void InitialiseFunctionTable()
 	_BeginScene = HWBeginScene;
 	_EndScene = HWEndScene;
 	IsVisible = _NVisible;
-
-	if (App.dx.lpZBuffer)
-	{
-		AddQuadZBuffer = AddQuadClippedZBuffer;
-		AddTriZBuffer = AddTriClippedZBuffer;
-		AddQuadSorted = AddQuadClippedSorted;
-		AddTriSorted = AddTriClippedSorted;
-	}
-	else
-	{
-		AddQuadZBuffer = AddQuadSubdivide;
-		AddTriZBuffer = AddTriSubdivide;
-		AddQuadSorted = AddQuadSubdivide;
-		AddTriSorted = AddTriSubdivide;		
-	}
-
+	AddQuadZBuffer = AddQuadSubdivide;
+	AddTriZBuffer = AddTriSubdivide;
+	AddQuadSorted = AddQuadSubdivide;
+	AddTriSorted = AddTriSubdivide;		
 	AddLineSorted = AddLineClippedSorted;
+}
+#define D3DTSS_COLOROP 0
+#define D3DTOP_DISABLE 0
+#define D3DTOP_MODULATE 1
+#define D3DTSS_ALPHAOP 2
+#define D3DTOP_SELECTARG1 1
+#define D3DTSS_COLORARG1 3
+#define D3DTSS_COLORARG2 4
+#define D3DTSS_ALPHAARG1 5
+#define D3DTSS_ALPHAARG2 6
+#define D3DTA_TEXTURE 1
+#define D3DTA_DIFFUSE 2
+#define D3DTA_TFACTOR 3
+#define D3DTSS_TEXCOORDINDEX 7
+#define D3DTSS_TCI_PASSTHRU 0
+
+// filters (dummy)
+#define D3DTSS_MINFILTER 0
+#define D3DTSS_MAGFILTER 0
+#define D3DTSS_MIPFILTER 0
+#define D3DTFN_LINEAR 1
+#define D3DTFP_NONE 0
+#define D3DTFG_LINEAR 1
+#define D3DTFG_POINT 0
+
+// stub DXAttempt
+#define DXAttempt(x) x
+static inline void GL_SetTextureStageState(GLDevice* dev, int stage, int state, int value) {
+    // Ignora D3DTSS_COLOROP / D3DTOP_DISABLE
+    if(state == D3DTSS_COLOROP && value == D3DTOP_DISABLE) {
+        glActiveTexture(GL_TEXTURE0 + stage);
+        glBindTexture(GL_TEXTURE_2D, 0); // disabilita la texture stage
+    }
+
+    // Ignora TEXCOORDINDEX per ora, puoi implementare se servono più coordinate
+    if(state == D3DTSS_TEXCOORDINDEX && value == D3DTSS_TCI_PASSTHRU) {
+        // pass-through: non serve fare nulla per OpenGL fixed function
+    }
 }
 
 void HWInitialise()
 {
 	Log(__FUNCTION__);
 
-	App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_DISABLE);	//disable all stages
-	App.dx.lpD3DDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	App.dx.lpD3DDevice->SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	App.dx.lpD3DDevice->SetTextureStageState(3, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	App.dx.lpD3DDevice->SetTextureStageState(4, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	App.dx.lpD3DDevice->SetTextureStageState(5, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	App.dx.lpD3DDevice->SetTextureStageState(6, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	App.dx.lpD3DDevice->SetTextureStageState(7, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+	for(int stage = 0; stage < 8; ++stage) {
+        GL_SetTextureStageState(&App.dx.gl, stage, D3DTSS_COLOROP, D3DTOP_DISABLE);
+    }
 
-	if (App.Filtering)
-	{
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTFN_LINEAR);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTFP_NONE);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTFG_LINEAR);
-	}
-	else
-	{
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTFG_POINT);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTFN_POINT);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTFP_NONE);
-	}
+    GL_SetTextureStageState(&App.dx.gl, 0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+    GL_SetTextureStageState(&App.dx.gl, 0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+    GL_SetTextureStageState(&App.dx.gl, 0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 
-	App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);	//multiply
-	App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-	App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);	//texture color
-	App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);	//diffuse color
-	App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TFACTOR);	//texture factor(?)
-	App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);	//diffuse color
-	App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
 
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, 0);	//disable alpha blending
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, 1);	//enable specular
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_CULLMODE, D3DCULL_NONE);	//no culling
+    // tutte le altre texture/alpha arg ignorate, perché OpenGL fixed function li usa direttamente
 
-	DXAttempt(App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZENABLE, D3DZB_TRUE));	//z buffering
-	DXAttempt(App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 1));
-	DXAttempt(App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_TEXTUREPERSPECTIVE, 1));	//perspective correction
+    // render states (dummy o equivalenti OpenGL)
+    glDisable(GL_BLEND);       // D3DRENDERSTATE_ALPHABLENDENABLE = 0
+    glEnable(GL_LIGHTING);     // speculare abilitato
+    glDisable(GL_CULL_FACE);   // no culling
+    glEnable(GL_DEPTH_TEST);   // z-buffer
+    glDepthMask(GL_TRUE);      // write-enable
+    glEnable(GL_TEXTURE_2D);   // texture perspective / perspective correction
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // D3DFILL_SOLID
+    glEnable(GL_DITHER);       // dithering
 
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMAPBLEND, D3DTBLEND_MODULATEALPHA);	//Modulate-alpha texture-blending
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_FILLMODE, D3DFILL_SOLID);	//Fill solids.
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE, 1);	//enable dithering
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHAREF, 0);	//reference value for alpha testing
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHAFUNC, D3DCMP_NOTEQUAL);	//accept pixels with different alpha(?)
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_SRCALPHA);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCALPHA);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, 0);	//disables alpha tests
+    // alpha test
+    glAlphaFunc(GL_NOTEQUAL, 0.0f);
+    glDisable(GL_ALPHA_TEST);
 
-	DXAttempt(App.dx.lpD3DDevice->SetLightState(D3DLIGHTSTATE_AMBIENT, 0));
-	DXAttempt(App.dx.lpD3DDevice->SetLightState(D3DLIGHTSTATE_COLORVERTEX, 0));
-	DXAttempt(App.dx.lpD3DDevice->SetLightState(D3DLIGHTSTATE_COLORMODEL, D3DCOLOR_RGB));
+    // luci (stub)
+    // DXAttempt(App.dx.lpD3DDevice->SetLightState(...));
 
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, 0);
+    // fog
+    glDisable(GL_FOG);
 }
 
 HRESULT HWBeginScene()
@@ -106,13 +109,11 @@ HRESULT HWBeginScene()
 	App.dx.InScene = 1;
 	App.dx.DoneBlit = 0;
 	while (App.dx.WaitAtBeginScene) {};
-	return App.dx.lpD3DDevice->BeginScene();
 }
 
 HRESULT HWEndScene()
 {
 	App.dx.InScene = 0;
-	return App.dx.lpD3DDevice->EndScene();
 }
 
 bool _NVisible(D3DTLVERTEX* v0, D3DTLVERTEX* v1, D3DTLVERTEX* v2)

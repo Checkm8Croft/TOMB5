@@ -21,74 +21,22 @@
 	if(!proc) throw #proc; \
 }
 
-static void(__stdcall* BinkCopyToBuffer)(BINK_STRUCT*, LPVOID, LONG, long, long, long, long);
+static void(__stdcall* BinkCopyToBuffer)(BINK_STRUCT*, LPVOID, long, long, long, long, long);
 static void(__stdcall* BinkOpenDirectSound)(ulong);
 static void(__stdcall* BinkSetSoundSystem)(LPVOID, LPDIRECTSOUND);
 static LPVOID(__stdcall* BinkOpen)(char*, ulong);
-static long(__stdcall* BinkDDSurfaceType)(LPDIRECTDRAWSURFACE4);
+static long(__stdcall* BinkDDSurfaceType)(SurfaceDesc*);
 static long(__stdcall* BinkDoFrame)(BINK_STRUCT*);
 static void(__stdcall* BinkNextFrame)(BINK_STRUCT*);
 static long(__stdcall* BinkWait)(BINK_STRUCT*);
 static void(__stdcall* BinkClose)(BINK_STRUCT*);
-static HMODULE hBinkW32;
 
 static long nFmvFrames[9] = { 880, 1826, 3869, 3112, 1903, 1973, 3200, 2799, 1725 };
 
 static BINK_STRUCT* Bink;
-static LPDIRECTDRAWSURFACE4 BinkSurface;
+static SurfaceDesc BinkSurface;
 static long BinkSurfaceType;
 
-bool LoadBinkStuff()
-{
-	hBinkW32 = LoadLibrary("binkw32.dll");
-
-	if (!hBinkW32)
-		return 0;
-
-	try
-	{
-		GET_DLL_PROC(hBinkW32, BinkCopyToBuffer, "_BinkCopyToBuffer@28");
-		GET_DLL_PROC(hBinkW32, BinkOpenDirectSound, "_BinkOpenDirectSound@4");
-		GET_DLL_PROC(hBinkW32, BinkSetSoundSystem, "_BinkSetSoundSystem@8");
-		GET_DLL_PROC(hBinkW32, BinkOpen, "_BinkOpen@8");
-		GET_DLL_PROC(hBinkW32, BinkDDSurfaceType, "_BinkDDSurfaceType@4");
-		GET_DLL_PROC(hBinkW32, BinkDoFrame, "_BinkDoFrame@4");
-		GET_DLL_PROC(hBinkW32, BinkNextFrame, "_BinkNextFrame@4");
-		GET_DLL_PROC(hBinkW32, BinkWait, "_BinkWait@4");
-		GET_DLL_PROC(hBinkW32, BinkClose, "_BinkClose@4");
-	}
-	catch (LPCTSTR)
-	{
-		FreeLibrary(hBinkW32);
-		hBinkW32 = 0;
-		return 0;
-	}
-
-	return 1;
-}
-
-void FreeBinkStuff()
-{
-	if (hBinkW32)
-	{
-		FreeLibrary(hBinkW32);
-		hBinkW32 = 0;
-	}
-}
-
-void ShowBinkFrame()
-{
-	DDSURFACEDESC2 surf;
-
-	memset(&surf, 0, sizeof(surf));
-	surf.dwSize = sizeof(DDSURFACEDESC2);
-	DXAttempt(BinkSurface->Lock(0, &surf, DDLOCK_NOSYSLOCK, 0));
-	BinkCopyToBuffer(Bink, surf.lpSurface, surf.lPitch, Bink->num, 0, 0, BinkSurfaceType);
-	DXAttempt(BinkSurface->Unlock(0));
-
-	if (App.dx.Flags & DXF_WINDOWED)
-		DXShowFrame();
-}
 
 long PlayFmv(long num)
 {
@@ -141,59 +89,6 @@ long PlayFmv(long num)
 		rm = 1;
 	}
 
-	Bink = 0;
-	BinkSetSoundSystem(BinkOpenDirectSound, App.dx.lpDS);
-	Bink = (BINK_STRUCT*)BinkOpen(path, 0);
-
-	if (App.dx.Flags & DXF_WINDOWED)
-		BinkSurface = App.dx.lpBackBuffer;
-	else
-		BinkSurface = App.dx.lpPrimaryBuffer;
-
-	BinkSurfaceType = BinkDDSurfaceType(BinkSurface);
-
-	if (Bink)
-	{
-		Log("Entering Bink Loop");
-		BinkDoFrame(Bink);
-		S_UpdateInput();
-
-		for (int i = 0; i != nFmvFrames[num]; i++)
-		{
-			if (input & IN_OPTION || input & IN_DRAW || MainThread.ended)
-				break;
-
-			BinkNextFrame(Bink);
-
-			while (BinkWait(Bink));
-
-			ShowBinkFrame();
-			BinkDoFrame(Bink);
-			S_UpdateInput();
-		}
-
-
-		BinkClose(Bink);
-		Bink = 0;
-	}
-	else
-		Log("FAILED TO CREATE BINK OBJECT");
-
-	if (rm)
-	{
-		App.DXInfo.nDisplayMode = dm;
-		DXChangeVideoMode();
-		InitWindow(0, 0, App.dx.dwRenderWidth, App.dx.dwRenderHeight, 20, 20480, 80, App.dx.dwRenderWidth, App.dx.dwRenderHeight);
-		InitFont();
-		S_InitD3DMatrix();
-		aSetViewMatrix();
-	}
-
-	DXChangeOutputFormat(sfx_frequencies[SoundQuality], 1);
-	HWInitialise();
-	ClearSurfaces();
-	App.fmv = 0;
-	return 0;
 }
 
 long PlayFmvNow(long num, long u)

@@ -1,5 +1,5 @@
 #include "../tomb5/pch.h"
-#include "../tomb5/libs/zlib/zlib.h"
+#include <zlib.h>
 #include "file.h"
 #include "function_stubs.h"
 #include "../game/gameflow.h"
@@ -35,6 +35,7 @@
 #include "../game/lara.h"
 #include "drawbars.h"
 #include "../tomb5/tomb5.h"
+#include <string.h>
 
 TEXTURESTRUCT* textinfo;
 SPRITESTRUCT* spriteinfo;
@@ -60,6 +61,7 @@ static char* FileData;
 static char* CompressedData;
 static float MonitorScreenU;
 static long FileCompressed = 1;
+
 
 static char ReadChar()
 {
@@ -371,8 +373,8 @@ void FreeLevel()
 bool LoadTextures(long RTPages, long OTPages, long BTPages)
 {
 	DXTEXTUREINFO* dxtex;
-	LPDIRECTDRAWSURFACE4 tSurf;
-	LPDIRECT3DTEXTURE2 pTex;
+	SurfaceDesc tSurf;
+	GLuint pTex;
 	uchar* TextureData;
 	long* d;
 	char* pData;
@@ -458,8 +460,7 @@ bool LoadTextures(long RTPages, long OTPages, long BTPages)
 	for (int i = 0; i < RTPages; i++)
 	{
 		nTex = nTextures++;
-		tSurf = CreateTexturePage(App.TextureSize, App.TextureSize, 0, (long*)(TextureData + (i * skip * 0x10000)), 0, format);
-		DXAttempt(tSurf->QueryInterface(IID_IDirect3DTexture2, (LPVOID*)&pTex));
+		GLuint dummyTex = 0;
 		Textures[nTex].tex = pTex;
 		Textures[nTex].surface = tSurf;
 		Textures[nTex].width = App.TextureSize;
@@ -479,14 +480,11 @@ bool LoadTextures(long RTPages, long OTPages, long BTPages)
 	for (int i = 0; i < OTPages; i++)
 	{
 		nTex = nTextures++;
-		tSurf = CreateTexturePage(App.TextureSize, App.TextureSize, 0, (long*)(TextureData + (i * skip * 0x10000)), 0, format);
-		DXAttempt(tSurf->QueryInterface(IID_IDirect3DTexture2, (LPVOID*)&pTex));
-		Textures[nTex].tex = pTex;
 		Textures[nTex].surface = tSurf;
 		Textures[nTex].width = App.TextureSize;
 		Textures[nTex].height = App.TextureSize;
 		Textures[nTex].bump = 0;
-		App.dx.lpD3DDevice->SetTexture(0, pTex);
+		glBindTexture(GL_TEXTURE_2D, pTex);
 		S_LoadBar();
 	}
 
@@ -503,18 +501,8 @@ bool LoadTextures(long RTPages, long OTPages, long BTPages)
 
 		for (int i = 0; i < BTPages; i++)
 		{
-			if (i < (BTPages >> 1))
-				tSurf = CreateTexturePage(App.TextureSize, App.TextureSize, 0, (long*)(TextureData + (i * skip * 0x10000)), 0, format);
-			else
-			{
-				if (!App.BumpMapping)
-					break;
-
-				tSurf = CreateTexturePage(App.BumpMapSize, App.BumpMapSize, 0, (long*)(TextureData + (i * skip * 0x10000)), 0, format);
-			}
 
 			nTex = nTextures++;
-			DXAttempt(tSurf->QueryInterface(IID_IDirect3DTexture2, (LPVOID*)&pTex));
 			Textures[nTex].tex = pTex;
 			Textures[nTex].surface = tSurf;
 
@@ -603,8 +591,6 @@ bool LoadTextures(long RTPages, long OTPages, long BTPages)
 			}
 
 			nTex = nTextures++;
-			tSurf = CreateTexturePage(256, 256, 0, (long*)TextureData, 0, 0);
-			DXAttempt(tSurf->QueryInterface(IID_IDirect3DTexture2, (LPVOID*)&pTex));
 			Textures[nTex].tex = pTex;
 			Textures[nTex].surface = tSurf;
 			Textures[nTex].width = 256;
@@ -618,8 +604,6 @@ bool LoadTextures(long RTPages, long OTPages, long BTPages)
 	//shine
 	ReadBlock(TextureData, 0x40000);
 	nTex = nTextures++;
-	tSurf = CreateTexturePage(256, 256, 0, (long*)TextureData, 0, 0);
-	DXAttempt(tSurf->QueryInterface(IID_IDirect3DTexture2, (LPVOID*)&pTex));
 	Textures[nTex].tex = pTex;
 	Textures[nTex].surface = tSurf;
 	Textures[nTex].width = 256;
@@ -629,8 +613,6 @@ bool LoadTextures(long RTPages, long OTPages, long BTPages)
 	//font
 	ReadBlock(TextureData, 0x40000);
 	nTex = nTextures++;
-	tSurf = CreateTexturePage(256, 256, 0, (long*)TextureData, 0, 0);
-	DXAttempt(tSurf->QueryInterface(IID_IDirect3DTexture2, (LPVOID*)&pTex));
 	Textures[nTex].tex = pTex;
 	Textures[nTex].surface = tSurf;
 	Textures[nTex].width = 256;
@@ -640,8 +622,6 @@ bool LoadTextures(long RTPages, long OTPages, long BTPages)
 	//sky
 	ReadBlock(TextureData, 0x40000);
 	nTex = nTextures++;
-	tSurf = CreateTexturePage(256, 256, 0, (long*)TextureData, 0, 0);
-	DXAttempt(tSurf->QueryInterface(IID_IDirect3DTexture2, (LPVOID*)&pTex));
 	Textures[nTex].tex = pTex;
 	Textures[nTex].surface = tSurf;
 	Textures[nTex].width = 256;
@@ -1214,11 +1194,10 @@ unsigned int __stdcall LoadLevel(void* name)
 	short RTPages, OTPages, BTPages;
 	short data[16];
 
-	Log("Begin " __FUNCTION__);
 	FreeLevel();
 	nTextures = 1;
 	Textures[0].tex = 0;
-	Textures[0].surface = 0;
+	memset(&Textures[0].surface, 0, sizeof(Textures[0].surface));
 	Textures[0].width = 0;
 	Textures[0].height = 0;
 	Textures[0].bump = 0;
@@ -1349,7 +1328,6 @@ unsigned int __stdcall LoadLevel(void* name)
 
 	aMakeCutsceneResident(gfResidentCut[0], gfResidentCut[1], gfResidentCut[2], gfResidentCut[3]);
 	LevelLoadingThread.active = 0;
-	_endthreadex(1);
 	return 1;
 }
 
@@ -1409,7 +1387,6 @@ long S_LoadLevelFile(long num)
 
 	LevelLoadingThread.active = 1;
 	LevelLoadingThread.ended = 0;
-	LevelLoadingThread.handle = _beginthreadex(0, 0, LoadLevel, name, 0, (unsigned int*)&LevelLoadingThread.address);
 
 	while (LevelLoadingThread.active)
 	{

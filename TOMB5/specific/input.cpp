@@ -313,7 +313,12 @@ long S_UpdateInput()
 	debounce = SetDebounce;
 
 	DXUpdateJoystick();
-	DXReadKeyboard(keymap);
+	char temp[256]; // oppure SDL_NUM_SCANCODES se hai SDL
+for(int i = 0; i < 256; ++i) {
+    temp[i] = (char)keymap[i];
+}
+
+	DXReadKeyboard(temp);
 
 	if (ControlMethod == 1)
 		joy_fire = ReadJoystick(joy_x, joy_y);

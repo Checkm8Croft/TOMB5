@@ -2,36 +2,65 @@
 #include "time.h"
 #include "function_stubs.h"
 
-static __int64 frequency;
-static __int64 counter;
+#include <stdint.h>
+#include <sys/time.h>   // gettimeofday
+#include <stdbool.h>    // per bool
 
+// -----------------------------------------------------
+// Replacement di QueryPerformanceCounter / Frequency
+// -----------------------------------------------------
+
+// Ritorna "ticks" in microsecondi
+static inline uint64_t GetPerformanceCounter(void)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (uint64_t)tv.tv_sec * 1000000ULL + (uint64_t)tv.tv_usec;
+}
+
+// Ritorna "frequenza" → 1 MHz (microsecondi)
+static inline uint64_t GetPerformanceFrequency(void)
+{
+    return 1000000ULL;
+}
+
+// -----------------------------------------------------
+// Variabili globali (simulano la logica originale)
+// -----------------------------------------------------
+static int64_t frequency = 0;
+static int64_t counter   = 0;
+
+// -----------------------------------------------------
+// Funzioni originali riscritte
+// -----------------------------------------------------
 long Sync()
 {
-	__int64 PerformanceCount, f;
-	long n;
+    int64_t PerformanceCount, f;
+    long n;
 
-	QueryPerformanceCounter((LARGE_INTEGER*)&PerformanceCount);
-	f = (PerformanceCount - counter) / frequency;
-	counter += frequency * f;
-	n = (long)f;
-	return n;
+    PerformanceCount = GetPerformanceCounter();
+    f = (PerformanceCount - counter) / frequency;
+    counter += frequency * f;
+    n = (long)f;
+    return n;
 }
 
 void TIME_Reset()
 {
-	QueryPerformanceCounter((LARGE_INTEGER*)&counter);
+    counter = GetPerformanceCounter();
 }
 
 bool TIME_Init()
 {
-	__int64 pfq;
+    int64_t pfq;
 
-	Log(__FUNCTION__);
+    Log(__FUNCTION__);
 
-	if (!QueryPerformanceFrequency((LARGE_INTEGER*)&pfq))
-		return 0;
+    pfq = GetPerformanceFrequency();
+    if (!pfq)
+        return 0;
 
-	frequency = pfq / 60;
-	TIME_Reset();
-	return 1;
+    frequency = pfq / 60;  // 60 Hz come originale
+    TIME_Reset();
+    return 1;
 }

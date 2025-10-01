@@ -1015,137 +1015,81 @@ long aCheckMeshClip(MESH_DATA* mesh)
 
 	return 2;
 }
-
-HRESULT DDCopyBitmap(LPDIRECTDRAWSURFACE4 surf, HBITMAP hbm, long x, long y, long dx, long dy)
+#define E_FAIL -1
+#define DD_OK 0
+int DDCopyBitmap(SDL_Surface* surf, SDL_Surface* bitmap, int x, int y, int dx, int dy)
 {
-	HDC hdc;
-	HDC hdc2;
-	BITMAP bitmap;
-	DDSURFACEDESC2 desc;
-	HRESULT result;
-	long l, t;
+    if (!surf || !bitmap)
+        return -1;
 
-	if (!hbm || !surf)
-		return E_FAIL;
+    // Se dx/dy = 0, prendiamo dimensione originale
+    if (!dx) dx = bitmap->w;
+    if (!dy) dy = bitmap->h;
 
-	surf->Restore();
-	hdc = CreateCompatibleDC(0);
+    SDL_Rect srcRect = { 0, 0, dx, dy };
+    SDL_Rect dstRect = { x, y, dx, dy };
 
-	if (!hdc)
-		OutputDebugString("createcompatible dc failed\n");
+    // Copia scalata
+    if (SDL_BlitScaled(bitmap, &srcRect, surf, &dstRect) < 0)
+    {
+        fprintf(stderr, "SDL_BlitScaled failed: %s\n", SDL_GetError());
+        return -1;
+    }
 
-	SelectObject(hdc, hbm);
-	GetObject(hbm, sizeof(BITMAP), &bitmap);
-
-	if (!dx)
-		dx = bitmap.bmWidth;
-
-	if (!dy)
-		dy = bitmap.bmHeight;
-
-	desc.dwSize = sizeof(DDSURFACEDESC2);
-	desc.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-	surf->GetSurfaceDesc(&desc);
-	l = 0;
-	t = 0;
-
-	if (!(App.dx.Flags & DXF_HWR))
-	{
-		surf = App.dx.lpPrimaryBuffer;
-
-		if (App.dx.Flags & DXF_WINDOWED)
-		{
-			l = App.dx.rScreen.left;
-			t = App.dx.rScreen.top;
-		}
-	}
-
-	result = surf->GetDC(&hdc2);
-
-	if (result == DD_OK)
-	{
-		StretchBlt(hdc2, l, t, desc.dwWidth, desc.dwHeight, hdc, x, y, dx, dy, SRCCOPY);
-		surf->ReleaseDC(hdc2);
-	}
-
-	DeleteDC(hdc);
-	return result;
+    return 0;
 }
 
-HRESULT _LoadBitmap(LPDIRECTDRAWSURFACE4 surf, LPCSTR name)
+int _LoadBitmap(SDL_Surface* surf, const char* name)
 {
-	HBITMAP hBitmap;
-	HRESULT result;
+    SDL_Surface* bitmap = SDL_LoadBMP(name);
+    if (!bitmap)
+    {
+        fprintf(stderr, "Failed to load BMP: %s\n", name);
+        return -1;
+    }
 
-	hBitmap = (HBITMAP)LoadImage(GetModuleHandle(0), name, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
+    int result = DDCopyBitmap(surf, bitmap, 0, 0, 0, 0);
+    SDL_FreeSurface(bitmap);
 
-	if (!hBitmap)
-		hBitmap = (HBITMAP)LoadImage(0, name, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
+    if (result < 0)
+        fprintf(stderr, "_LoadBitmap failed for %s\n", name);
 
-	if (!hBitmap)
-	{
-		OutputDebugString("handle is null\n");
-		return E_FAIL;
-	}
+		    SDL_Surface* s = (SDL_Surface*)&surf; // cast for now, se lpBackBuffer è SDL_Surface*
+    SDL_Surface* bmp = SDL_LoadBMP(name);
 
-	result = DDCopyBitmap(surf, hBitmap, 0, 0, 0, 0);
+    if (!bmp) return -1;
 
-	if (result != DD_OK)
-		OutputDebugString("ddcopybitmap failed\n");
-
-	DeleteObject(hBitmap);
-	return result;
+    SDL_BlitSurface(bmp, NULL, s, NULL);
+    SDL_FreeSurface(bmp);
+    return 0;
+    return result;
 }
 
 void do_boot_screen(long language)
 {
-	Log(__FUNCTION__);
+    Log(__FUNCTION__);
 
-	switch (language)
-	{
-	case ENGLISH:
-	case DUTCH:
-		_LoadBitmap(App.dx.lpBackBuffer, "uk.bmp");
-		S_DumpScreen();
-		_LoadBitmap(App.dx.lpBackBuffer, "uk.bmp");
-		break;
+    const char* filename = NULL;
 
-	case FRENCH:
-		_LoadBitmap(App.dx.lpBackBuffer, "france.bmp");
-		S_DumpScreen();
-		_LoadBitmap(App.dx.lpBackBuffer, "france.bmp");
-		break;
+    switch (language)
+    {
+        case ENGLISH: filename = "uk.bmp"; break;
+        case DUTCH:   filename = "uk.bmp"; break;
+        case FRENCH:  filename = "france.bmp"; break;
+        case GERMAN:  filename = "germany.bmp"; break;
+        case ITALIAN: filename = "italy.bmp"; break;
+        case SPANISH: filename = "spain.bmp"; break;
+        case US:      filename = "usa.bmp"; break;
+        case JAPAN:   filename = "japan.bmp"; break;
+        default:      filename = "uk.bmp"; break;
+    }
 
-	case GERMAN:
-		_LoadBitmap(App.dx.lpBackBuffer, "germany.bmp");
-		S_DumpScreen();
-		_LoadBitmap(App.dx.lpBackBuffer, "germany.bmp");
-		break;
-
-	case ITALIAN:
-		_LoadBitmap(App.dx.lpBackBuffer, "italy.bmp");
-		S_DumpScreen();
-		_LoadBitmap(App.dx.lpBackBuffer, "italy.bmp");
-		break;
-
-	case SPANISH:
-		_LoadBitmap(App.dx.lpBackBuffer, "spain.bmp");
-		S_DumpScreen();
-		_LoadBitmap(App.dx.lpBackBuffer, "spain.bmp");
-		break;
-
-	case US:
-		_LoadBitmap(App.dx.lpBackBuffer, "usa.bmp");
-		S_DumpScreen();
-		_LoadBitmap(App.dx.lpBackBuffer, "usa.bmp");
-		break;
-
-	case JAPAN:
-		_LoadBitmap(App.dx.lpBackBuffer, "japan.bmp");
-		S_DumpScreen();
-		_LoadBitmap(App.dx.lpBackBuffer, "japan.bmp");
-		break;
-	}
+    if (filename)
+    {
+        _LoadBitmap(App.dx.lpBackBuffer, filename);
+        S_DumpScreen();
+        _LoadBitmap(App.dx.lpBackBuffer, filename);
+    }
 }
 
 void aCalcColorSplit(long col, long* pC, long* pS)
@@ -1359,13 +1303,11 @@ void SkinNormalsToScratch(long node)
 
 void S_InitialisePolyList()
 {
-	D3DRECT r;
-
-	r.x1 = App.dx.rViewport.left;
-	r.y1 = App.dx.rViewport.top;
-	r.y2 = App.dx.rViewport.top + App.dx.rViewport.bottom;
-	r.x2 = App.dx.rViewport.left + App.dx.rViewport.right;
-	DXAttempt(App.dx.lpViewport->Clear2(1, &r, D3DCLEAR_TARGET, 0, 1.0F, 0));
+	SDL_Rect r;
+	r.x = App.dx.rViewport.left;
+	r.y = App.dx.rViewport.top;
+	r.w = App.dx.rViewport.right - App.dx.rViewport.left;
+	r.h = App.dx.rViewport.bottom - App.dx.rViewport.top;
 
 	_BeginScene();
 	InitBuckets();
@@ -1374,15 +1316,14 @@ void S_InitialisePolyList()
 
 void S_OutputPolyList()
 {
-	D3DRECT r;
+	Rect r;
 	static long c;
 	long h;
 	char buf[128];
 
 	WinFrameRate();
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_SRCALPHA);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCALPHA);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, 0);
+	SDL_SetSurfaceBlendMode((SDL_Surface*)&App.dx.lpBackBuffer, SDL_BLENDMODE_BLEND);
+
 
 	if (resChangeCounter)
 	{
@@ -1394,27 +1335,28 @@ void S_OutputPolyList()
 			resChangeCounter = 0;
 	}
 
-	if (App.dx.lpZBuffer)
+	if ((SDL_Surface*)&App.dx.lpZBuffer)
 		DrawBuckets();
 
 	if (gfCurrentLevel == LVL5_TITLE)
 	{
 		Fade();
 
-		if (App.dx.lpZBuffer)
+		if ((SDL_Surface*)&App.dx.lpZBuffer)
 			DrawSortList();
 	}
 
 	SortPolyList(SortCount, SortList);
 	DrawSortList();
 
-	if (App.dx.lpZBuffer)
+	if ((SDL_Surface*)&App.dx.lpZBuffer)
 	{
-		r.x1 = App.dx.rViewport.left;
-		r.y1 = App.dx.rViewport.top;
-		r.x2 = App.dx.rViewport.left + App.dx.rViewport.right;
-		r.y2 = App.dx.rViewport.top + App.dx.rViewport.bottom;
-		DXAttempt(App.dx.lpViewport->Clear2(1, &r, D3DCLEAR_ZBUFFER, 0, 1.0F, 0));
+		SDL_Rect r;
+r.x = App.dx.rViewport.left;
+r.y = App.dx.rViewport.top;
+r.w = App.dx.rViewport.right - App.dx.rViewport.left;
+r.h = App.dx.rViewport.bottom - App.dx.rViewport.top;
+
 	}
 
 	if ((BinocularRange || SCOverlay || SniperOverlay) && !MonoScreenOn)
@@ -1731,7 +1673,7 @@ void phd_PutPolygonsSkyMesh(short* objptr, long clipstatus)
 				pTex->drawtype = 2;
 			else
 			{
-				if (App.dx.lpZBuffer)
+				if ((SDL_Surface*)&App.dx.lpZBuffer)
 				{
 					aVertexBuffer[quad[0]].color = 0;
 					aVertexBuffer[quad[1]].color = 0;
@@ -2405,7 +2347,7 @@ long GetFixedScale(long unit)
 
 	w = 640;
 	h = 480;
-	x = (phd_winwidth > w) ? MulDiv(phd_winwidth, unit, w) : unit;
-	y = (phd_winheight > h) ? MulDiv(phd_winheight, unit, h) : unit;
+	x = (phd_winwidth > w) ? (phd_winwidth * unit / w) : unit;
+	y = (phd_winheight > h) ? (phd_winheight * unit / h) : unit;
 	return x < y ? x : y;
 }

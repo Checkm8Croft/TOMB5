@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
+#include <stdbool.h>
 
 // Simuliamo i driver ACM con SDL2
 typedef void* HACMDRIVER;
@@ -22,7 +23,7 @@ void GetADPCMData();
 void ACMEmulateCDPlay(long track, long mode);
 
 // Callback fittizia (non usata realmente in SDL2)
-BOOL ACMEnumCallBack(HACMDRIVERID hadid, DWORD_PTR dwInstance, DWORD fdwSupport);
+bool ACMEnumCallBack(HACMDRIVERID hadid, DWORD_PTR dwInstance);
 
 long ACMSetupNotifications();
 void FillADPCMBuffer(char* p, long track);
@@ -39,7 +40,7 @@ extern unsigned char* ADPCMBuffer;
 extern bool acm_ready;
 extern long XATrack;
 extern long XAFlag;
-
+extern const char* TrackFileNames[];
 // --- Nuove strutture per SDL2 ---
 extern Mix_Music* current_music;
 extern Mix_Chunk* current_sound;

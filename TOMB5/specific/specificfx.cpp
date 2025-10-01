@@ -930,14 +930,22 @@ void InitBinoculars()
 
 void OutputSky()
 {
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_SRCALPHA);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCALPHA);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, 0);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZENABLE, 1);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 0);
-	DrawBuckets();
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZENABLE, 1);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 1);
+glEnable(GL_BLEND);
+glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+// Depth test abilitato
+glEnable(GL_DEPTH_TEST);
+
+// Depth write disabilitata temporaneamente
+glDepthMask(GL_FALSE);
+
+// Disegna i poligoni
+DrawBuckets();
+
+// Ripristina depth write
+glDepthMask(GL_TRUE);
+glEnable(GL_DEPTH_TEST); // assicurati che il depth test sia attivo
+glDisable(GL_BLEND);     // se vuoi disabilitare blending come in D3D
 	SortPolyList(SortCount, SortList);
 	DrawSortList();
 	InitBuckets();
@@ -2396,7 +2404,12 @@ void DrawPsxTile(long x_y, long height_width, long color, long u0, long u1)
 	clipflags[3] = 0;
 	AddQuadSorted(v, 0, 1, 2, 3, &tex, 0);
 }
-
+void CalcColorSplit(unsigned long c, ColorF* col) {
+    col->r = ((c >> 16) & 0xFF) / 255.0f;
+    col->g = ((c >> 8) & 0xFF) / 255.0f;
+    col->b = (c & 0xFF) / 255.0f;
+    col->a = ((c >> 24) & 0xFF) / 255.0f;
+}
 void DrawFlash()
 {
 	long r, g, b;
@@ -2407,6 +2420,7 @@ void DrawFlash()
 	DrawPsxTile(0, phd_winwidth | (phd_winheight << 16), RGBA(r, g, b, 0x62), 1, 0);
 	DrawPsxTile(0, phd_winwidth | (phd_winheight << 16), RGBA(r, g, b, 0xFF), 2, 0);
 }
+ColorF color;
 
 void DrawDebris()
 {
@@ -2474,7 +2488,8 @@ void DrawDebris()
 			b = 255;
 
 		c = RGBONLY(r, g, b);
-		CalcColorSplit(c, &v[0].color);
+		CalcColorSplit(c, &color);
+
 
 		c = dptr->color2 & 0xFF;
 		r = ((c * dptr->r) >> 8) + CLRR(dptr->ambient);
@@ -2491,7 +2506,8 @@ void DrawDebris()
 			b = 255;
 
 		c = RGBONLY(r, g, b);
-		CalcColorSplit(c, &v[1].color);
+		CalcColorSplit(c, &color);
+
 
 		c = dptr->color3 & 0xFF;
 		r = ((c * dptr->r) >> 8) + CLRR(dptr->ambient);
@@ -2508,7 +2524,7 @@ void DrawDebris()
 			b = 255;
 
 		c = RGBONLY(r, g, b);
-		CalcColorSplit(c, &v[2].color);
+		CalcColorSplit(c, &color);
 
 		v[0].color |= 0xFF000000;
 		v[1].color |= 0xFF000000;
@@ -3774,8 +3790,8 @@ void DrawRope(ROPE_STRUCT* rope)
 	{
 		d = ((0x1000000 / (d >> 8)) << 8) >> 8;
 		b = dx;
-		dx = ((__int64)-dy * (__int64)d) >> 16;
-		dy = ((__int64)b * (__int64)d) >> 16;
+		dx = ((int64_t)-dy * (int64_t)d) >> 16;
+		dy = ((int64_t)b * (int64_t)d) >> 16;
 	}
 
 	w = 0x60000;
@@ -3789,8 +3805,8 @@ void DrawRope(ROPE_STRUCT* rope)
 	}
 
 	w <<= 16;
-	dx = (((__int64)dx * (__int64)w) >> 16) >> 16;
-	dy = (((__int64)dy * (__int64)w) >> 16) >> 16;
+	dx = (((int64_t)dx * (int64_t)w) >> 16) >> 16;
+	dy = (((int64_t)dy * (int64_t)w) >> 16) >> 16;
 	x1 = rope->Coords[0][0] - dx;
 	y1 = rope->Coords[0][1] - dy;
 	z1 = rope->Coords[0][2] >> W2V_SHIFT;
@@ -3812,8 +3828,8 @@ void DrawRope(ROPE_STRUCT* rope)
 		{
 			d = ((0x1000000 / (d >> 8)) << 8) >> 8;
 			b = dx;
-			dx = ((__int64)-dy * (__int64)d) >> 16;
-			dy = ((__int64)b * (__int64)d) >> 16;
+			dx = ((int64_t)-dy * (int64_t)d) >> 16;
+			dy = ((int64_t)b * (int64_t)d) >> 16;
 		}
 
 		w = 0x60000;
@@ -3827,8 +3843,8 @@ void DrawRope(ROPE_STRUCT* rope)
 		}
 
 		w <<= 16;
-		dx = (((__int64)dx * (__int64)w) >> 16) >> 16;
-		dy = (((__int64)dy * (__int64)w) >> 16) >> 16;
+		dx = (((int64_t)dx * (int64_t)w) >> 16) >> 16;
+		dy = (((int64_t)dy * (int64_t)w) >> 16) >> 16;
 		x2 = rope->Coords[i + 1][0] - dx;
 		y2 = rope->Coords[i + 1][1] - dy;
 		z2 = rope->Coords[i + 1][2] >> W2V_SHIFT;
@@ -5587,7 +5603,7 @@ void DrawSkySegment(ulong color, long drawtype, long def, long seg, long zpos, l
 		vec[i].z = aMXPtr[M20] * x + aMXPtr[M21] * y + aMXPtr[M22] * z + aMXPtr[M23];
 		v[i].color = color | 0xFF000000;
 		v[i].specular = 0xFF000000;
-		CalcColorSplit(color, &v[i].color);
+
 	}
 
 	clip = clipflags;
@@ -5659,7 +5675,7 @@ void DrawSkySegment(ulong color, long drawtype, long def, long seg, long zpos, l
 		vec[i].z = aMXPtr[M20] * x + aMXPtr[M21] * y + aMXPtr[M22] * z + aMXPtr[M23];
 		v[i].color |= 0xFF000000;
 		v[i].specular = 0xFF000000;
-		CalcColorSplit(color, &v[i].color);
+
 	}
 
 	clip = clipflags;
@@ -5760,7 +5776,6 @@ void DrawFlatSky(ulong color, long zpos, long ypos, long drawtype)
 		vec[i].z = aMXPtr[M20] * x + aMXPtr[M21] * y + aMXPtr[M22] * z + aMXPtr[M23];
 		v[i].color = color | 0xFF000000;
 		v[i].specular = 0xFF000000;
-		CalcColorSplit(color, &v[i].color);
 	}
 
 	clip = clipflags;
@@ -5807,7 +5822,6 @@ void DrawFlatSky(ulong color, long zpos, long ypos, long drawtype)
 		vec[i].z = aMXPtr[M20] * x + aMXPtr[M21] * y + aMXPtr[M22] * z + aMXPtr[M23];
 		v[i].color |= 0xFF000000;
 		v[i].specular = 0xFF000000;
-		CalcColorSplit(color, &v[i].color);
 	}
 
 	clip = clipflags;

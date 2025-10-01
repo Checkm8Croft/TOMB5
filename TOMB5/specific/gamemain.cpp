@@ -100,7 +100,7 @@ static void init_water_table()
 
 long S_SaveGame(long slot_num)
 {
-	HANDLE file;
+	FILE* file;
 	ulong bytes;
 	long days, hours, minutes, seconds;
 	char buffer[80], counter[16];
@@ -108,29 +108,29 @@ long S_SaveGame(long slot_num)
 	for (int i = 0; i < 20; i++)
 		buffer[i] = '\0';
 
-	wsprintf(buffer, "savegame.%d", slot_num);
-	file = CreateFile(buffer, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	sprintf(buffer, "savegame.%d", slot_num);
+	file = fopen(buffer, "wb");
 
-	if (file != INVALID_HANDLE_VALUE)
+	if (file != NULL)
 	{
 		for (int i = 0; i < 20; i++)
 			buffer[i] = '\0';
 
-		wsprintf(buffer, "%s", SCRIPT_TEXT(gfLevelNames[gfCurrentLevel]));
-		WriteFile(file, buffer, 75, &bytes, 0);
-		WriteFile(file, &SaveCounter, sizeof(long), &bytes, 0);
+		sprintf(buffer, "%s", SCRIPT_TEXT(gfLevelNames[gfCurrentLevel]));
+		fwrite(buffer, 75, 1, file);
+		fwrite(&SaveCounter, sizeof(long), 1, file);
 		days = savegame.Game.Timer / 30 / 86400;
 		hours = savegame.Game.Timer / 30 % 86400 / 3600;
 		minutes = savegame.Game.Timer / 30 / 60 % 60;
 		seconds = savegame.Game.Timer / 30 % 60;
-		WriteFile(file, &days, 2, &bytes, 0);
-		WriteFile(file, &hours, 2, &bytes, 0);
-		WriteFile(file, &minutes, 2, &bytes, 0);
-		WriteFile(file, &seconds, 2, &bytes, 0);
-		WriteFile(file, &savegame, sizeof(SAVEGAME_INFO), &bytes, 0);
-		WriteFile(file, &tomb5_save, sizeof(tomb5_save_info), &bytes, 0);
-		CloseHandle(file);
-		wsprintf(counter, "%d", SaveCounter);
+		fwrite(&days, 2, 1, file);
+		fwrite(&hours, 2, 1, file);
+		fwrite(&minutes, 2, 1, file);
+		fwrite(&seconds, 2, 1, file);
+		fwrite(&savegame, sizeof(SAVEGAME_INFO), 1, file);
+		fwrite(&tomb5_save, sizeof(tomb5_save_info), 1, file);
+		fclose(file);
+		sprintf(counter, "%d", SaveCounter);
 		SaveCounter++;
 		return 1;
 	}
@@ -140,23 +140,23 @@ long S_SaveGame(long slot_num)
 
 long S_LoadGame(long slot_num)
 {
-	HANDLE file;
+	FILE* file;
 	ulong bytes;
 	long value;
 	char buffer[80];
 
-	wsprintf(buffer, "savegame.%d", slot_num);
-	file = CreateFile(buffer, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	sprintf(buffer, "savegame.%d", slot_num);
+	file = fopen(buffer, "rb");
 
-	if (file != INVALID_HANDLE_VALUE)
+	if (file != NULL)
 	{
-		ReadFile(file, buffer, 75, &bytes, 0);
-		ReadFile(file, &value, sizeof(long), &bytes, 0);
-		ReadFile(file, &value, sizeof(long), &bytes, 0);
-		ReadFile(file, &value, sizeof(long), &bytes, 0);
-		ReadFile(file, &savegame, sizeof(SAVEGAME_INFO), &bytes, 0);
-		ReadFile(file, &tomb5_save, sizeof(tomb5_save_info), &tomb5_save_size, 0);
-		CloseHandle(file);
+		fread(buffer, 75, 1, file);
+		fread(&value, sizeof(long), 1, file);
+		fread(&value, sizeof(long), 1, file);
+		fread(&value, sizeof(long), 1, file);
+		fread(&savegame, sizeof(SAVEGAME_INFO), 1, file);
+		fread(&tomb5_save, sizeof(tomb5_save_info), 1, file);
+		fclose(file);
 		return 1;
 	}
 
@@ -198,9 +198,11 @@ unsigned int __stdcall GameMain(void* ptr)
 		S_CDStop();
 		RPC_close();
 
-		PostMessage(App.hWnd, WM_CLOSE, 0, 0);
+SDL_Event event;
+event.type = SDL_QUIT;
+SDL_PushEvent(&event);
 		MainThread.active = 0;
-		_endthreadex(1);
+		pthread_exit(NULL);
 	}
 
 	return 1;

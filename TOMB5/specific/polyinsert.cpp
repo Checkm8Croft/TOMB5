@@ -23,128 +23,80 @@ D3DTLBUMPVERTEX zClipperBuffer[20];
 
 void HWR_DrawSortList(D3DTLBUMPVERTEX* info, short num_verts, short texture, short type)
 {
-	switch (type)
-	{
-	case 0:
+    // Bind texture
+        glBindTexture(GL_TEXTURE_2D, 0);
 
-		if (App.dx.lpZBuffer)
-			App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 1);
+    switch (type)
+    {
+    case 0: // alpha test ON, blending OFF
+        glDisable(GL_BLEND);
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.5f);
+        break;
 
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, 0);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, 0);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_SRCALPHA);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCALPHA);
-		DXAttempt(App.dx.lpD3DDevice->SetTexture(0, Textures[texture].tex));
-		App.dx.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF, info, num_verts, D3DDP_DONOTUPDATEEXTENTS | D3DDP_DONOTCLIP);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, 1);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, 1);
-		break;
+    case 1: // normale alpha blend
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_ALPHA_TEST);
+        break;
 
-	case 1:
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, 1);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, 1);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_SRCALPHA);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCALPHA);
-		DXAttempt(App.dx.lpD3DDevice->SetTexture(0, Textures[texture].tex));
-		App.dx.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF, info, num_verts, D3DDP_DONOTUPDATEEXTENTS | D3DDP_DONOTCLIP);
-		break;
+    case 2: // additive
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+        glDisable(GL_ALPHA_TEST);
+        break;
 
-	case 2:
+    case 3: // trasparente con Z-write disattivato
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_ALPHA_TEST);
+        glDepthMask(GL_FALSE);   // disattiva Z-write
+        break;
 
-		if (App.dx.lpZBuffer)
-			App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 0);
+    case 4: // disabilita Z completamente
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+        break;
 
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, 0);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_ONE);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_ONE);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, 0);
-		DXAttempt(App.dx.lpD3DDevice->SetTexture(0, Textures[texture].tex));
-		App.dx.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF, info, num_verts, D3DDP_DONOTUPDATEEXTENTS | D3DDP_DONOTCLIP);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, 1);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_SRCALPHA);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCALPHA);
-		break;
+    case 5: // modalità moltiplicativa speciale
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+        glEnable(GL_ALPHA_TEST);
+        glDepthMask(GL_FALSE);
+        break;
 
-	case 3:
+    case 6: // linee additive (wireframe/effetti)
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+        glDisable(GL_ALPHA_TEST);
+        glDepthMask(GL_FALSE);
+        glBindTexture(GL_TEXTURE_2D, 0); // niente texture
+        break;
 
-		if (App.dx.lpZBuffer)
-			App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 0);
+    case 7: // normale alpha blend ma con Z-write attivo
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_ALPHA_TEST);
+        glDepthMask(GL_TRUE);
+        break;
+    }
 
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, 0);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, 1);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_SRCALPHA);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCALPHA);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-		DXAttempt(App.dx.lpD3DDevice->SetTexture(0, Textures[texture].tex));
-		App.dx.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF, info, num_verts, D3DDP_DONOTUPDATEEXTENTS | D3DDP_DONOTCLIP);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, 1);
-		break;
+    // Disegno effettivo
+    glBegin(GL_TRIANGLES);
+    for (int i = 0; i < num_verts; i++) {
+        glColor4ubv((GLubyte*)&info[i].color);
+        glTexCoord2f(info[i].tu, info[i].tv);
+        glVertex3f(info[i].sx, info[i].sy, info[i].sz);
+    }
+    glEnd();
 
-	case 4:
-		DXAttempt(App.dx.lpD3DDevice->SetTexture(0, Textures[texture].tex));
-
-		if (App.dx.lpZBuffer)
-		{
-			App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZENABLE, 0);
-			App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 0);
-		}
-
-		App.dx.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF, info, num_verts, D3DDP_DONOTUPDATEEXTENTS | D3DDP_DONOTCLIP);
-
-		if (App.dx.lpZBuffer)
-		{
-			App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 1);
-			App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZENABLE, 1);
-		}
-
-		break;
-
-	case 5:
-
-		if (App.dx.lpZBuffer)
-			App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 0);
-
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, 0);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, 1);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_ZERO);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCCOLOR);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE4X);
-		DXAttempt(App.dx.lpD3DDevice->SetTexture(0, Textures[texture].tex));
-		App.dx.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF, info, num_verts, D3DDP_DONOTUPDATEEXTENTS | D3DDP_DONOTCLIP);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, 1);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-		break;
-
-	case 6:
-
-		if (App.dx.lpZBuffer)
-			App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 0);
-
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, 0);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_ONE);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_ONE);
-		DXAttempt(App.dx.lpD3DDevice->SetTexture(0, 0));
-		App.dx.lpD3DDevice->DrawPrimitive(D3DPT_LINELIST, FVF, info, num_verts, D3DDP_DONOTUPDATEEXTENTS | D3DDP_DONOTCLIP);
-		break;
-
-	case 7:
-
-		if (App.dx.lpZBuffer)
-			App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 1);
-
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, 1);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_SRCALPHA);
-		App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCALPHA);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-		DXAttempt(App.dx.lpD3DDevice->SetTexture(0, Textures[texture].tex));
-		App.dx.lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF, info, num_verts, D3DDP_DONOTUPDATEEXTENTS | D3DDP_DONOTCLIP);
-		App.dx.lpD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-		break;
-	}
+    // 🔄 ripristino stati per evitare side effects
+    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_BLEND);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
 }
+
 
 void DrawSortList()
 {
@@ -160,28 +112,32 @@ void DrawSortList()
 	if (!SortCount)
 		return;
 
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, 1);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_SRCALPHA);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCALPHA);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, 1);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.5f); // equivalente a ALPHATESTENABLE
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	if (!App.dx.lpZBuffer)
-	{
-		for (int i = 0; i < SortCount; i++)
-		{
-			pSort = SortList[i];
-			vtx = (D3DTLBUMPVERTEX*)(pSort + 1);
+		if ((SDL_Surface*)&App.dx.lpZBuffer)
+{
+    for (int i = 0; i < SortCount; i++)
+    {
+        pSort = SortList[i];
+        vtx = (D3DTLBUMPVERTEX*)(pSort + 1);
 
-			if (pSort->polytype == 4)
-				App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_TEXTUREPERSPECTIVE, 0);
+        if (pSort->polytype == 4) {
+            // In Direct3D: D3DRENDERSTATE_TEXTUREPERSPECTIVE = 0
+            // In OpenGL: disabilita la correzione prospettica delle texture
+            glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+        }
 
-			HWR_DrawSortList(vtx, pSort->nVtx, pSort->tpage, pSort->drawtype);
+        HWR_DrawSortList(vtx, pSort->nVtx, pSort->tpage, pSort->drawtype);
 
-			if (pSort->polytype == 4)
-				App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_TEXTUREPERSPECTIVE, 1);
-
-		}
-	}
+        if (pSort->polytype == 4) {
+            // Ripristina prospettiva normale
+            glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+        }
+    }
+}
 	else
 	{
 		pSort = SortList[0];
@@ -299,9 +255,9 @@ void DrawSortList()
 			HWR_DrawSortList(bVtxbak, nVtx, tpage, drawtype);
 	}
 
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE, 1);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, 0);
-	App.dx.lpD3DDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, 0);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_BLEND);
 	InitBuckets();
 }
 

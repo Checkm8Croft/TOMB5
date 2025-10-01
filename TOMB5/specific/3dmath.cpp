@@ -100,7 +100,7 @@ static void aInitMatrix()
 void aSetViewMatrix()
 {
 	SetD3DMatrix(&D3DMView, aMXPtr);
-	DXAttempt(App.dx.lpD3DDevice->SetTransform(D3DTRANSFORMSTATE_VIEW, &D3DMView));
+	SetViewMatrix((Matrix4x4*)&D3DMView);
 }
 
 static void aPushMatrix()

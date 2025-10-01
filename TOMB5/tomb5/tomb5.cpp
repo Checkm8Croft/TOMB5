@@ -1,10 +1,9 @@
 #include "../tomb5/pch.h"
 #include "tomb5.h"
 #include "../specific/registry.h"
-#include "libs/discordRPC/discord_rpc.h"
 #include "../game/gameflow.h"
 #include "../game/lara.h"
-
+#include <stdbool.h>
 tomb5_options tomb5;
 
 void init_tomb5_stuff()
@@ -116,76 +115,77 @@ void init_tomb5_stuff()
 	else	//Key already exists, settings already written, read them. also falls back to default if a smartass manually deletes a single value
 	{
 		sprintf(buf, "footprints");
-		REG_ReadBool(buf, tomb5.footprints, 1);
+		REG_ReadBool(buf, &tomb5.footprints, 1);
+
 
 		sprintf(buf, "shadow");
-		REG_ReadLong(buf, tomb5.shadow_mode, 3);
+		REG_ReadLong(buf, &tomb5.shadow_mode, 3);
 
 		sprintf(buf, "climbup");
-		REG_ReadBool(buf, tomb5.fix_climb_up_delay, 1);
+		REG_ReadBool(buf, &tomb5.fix_climb_up_delay, 1);
 
 		sprintf(buf, "flex_crawl");
-		REG_ReadBool(buf, tomb5.flexible_crawling, 1);
+		REG_ReadBool(buf, &tomb5.flexible_crawling, 1);
 
 		sprintf(buf, "cutseq_skipper");
-		REG_ReadBool(buf, tomb5.cutseq_skipper, 0);
+		REG_ReadBool(buf, &tomb5.cutseq_skipper, 0);
 
 		sprintf(buf, "cheats");
-		REG_ReadBool(buf, tomb5.enable_cheats, 0);
+		REG_ReadBool(buf, &tomb5.enable_cheats, 0);
 
 		sprintf(buf, "bar_pos");
-		REG_ReadLong(buf, tomb5.bars_pos, 1);
+		REG_ReadLong(buf, &tomb5.bars_pos, 1);
 
 		sprintf(buf, "enemy_bar");
-		REG_ReadBool(buf, tomb5.enemy_bars, 0);
+		REG_ReadBool(buf, &tomb5.enemy_bars, 0);
 
 		sprintf(buf, "ammo_counter");
-		REG_ReadBool(buf, tomb5.ammo_counter, 0);
+		REG_ReadBool(buf, &tomb5.ammo_counter, 0);
 
 		sprintf(buf, "gameover");
-		REG_ReadBool(buf, tomb5.gameover, 1);
+		REG_ReadBool(buf, &tomb5.gameover, 1);
 
 		sprintf(buf, "fog");
-		REG_ReadBool(buf, tomb5.fog, 1);
+		REG_ReadBool(buf, &tomb5.fog, 1);
 
 		sprintf(buf, "barMode");
-		REG_ReadLong(buf, tomb5.bar_mode, 3);
+		REG_ReadLong(buf, &tomb5.bar_mode, 3);
 
 		sprintf(buf, "crawltilt");
-		REG_ReadBool(buf, tomb5.crawltilt, 1);
+		REG_ReadBool(buf, &tomb5.crawltilt, 1);
 
 		sprintf(buf, "psxsky");
-		REG_ReadBool(buf, tomb5.PSX_skies, 1);
+		REG_ReadBool(buf, &tomb5.PSX_skies, 1);
 
 		sprintf(buf, "tr4LS");
-		REG_ReadBool(buf, tomb5.tr4_loadscreens, 1);
+		REG_ReadBool(buf, &tomb5.tr4_loadscreens, 1);
 
 		sprintf(buf, "tr4LB");
-		REG_ReadBool(buf, tomb5.tr4_loadbar, 1);
+		REG_ReadBool(buf, &tomb5.tr4_loadbar, 1);
 
 		sprintf(buf, "inv_bgM");
-		REG_ReadLong(buf, tomb5.inv_bg_mode, 1);
+		REG_ReadLong(buf, &tomb5.inv_bg_mode, 1);
 
 		sprintf(buf, "loadtxt");
-		REG_ReadBool(buf, tomb5.loadingtxt, 1);
+		REG_ReadBool(buf, &tomb5.loadingtxt, 1);
 
 		sprintf(buf, "shimmer");
-		REG_ReadBool(buf, tomb5.shimmer, 1);
+		REG_ReadBool(buf, &tomb5.shimmer, 1);
 
 		sprintf(buf, "distance_fog");
-		REG_ReadLong(buf, tomb5.distance_fog, 12);
+		REG_ReadLong(buf, &tomb5.distance_fog, 12);
 
 		sprintf(buf, "ammotype_hotkeys");
-		REG_ReadBool(buf, tomb5.ammotype_hotkeys, 1);
+		REG_ReadBool(buf, &tomb5.ammotype_hotkeys, 1);
 
 		sprintf(buf, "ltransparency");
-		REG_ReadBool(buf, tomb5.look_transparency, 1);
+		REG_ReadBool(buf, &tomb5.look_transparency, 1);
 
 		sprintf(buf, "static_lighting");
-		REG_ReadBool(buf, tomb5.static_lighting, 1);
+		REG_ReadBool(buf, &tomb5.static_lighting, 1);
 
 		sprintf(buf, "uw_dust");
-		REG_ReadLong(buf, tomb5.uw_dust, 2);
+		REG_ReadLong(buf, &tomb5.uw_dust, 2);
 	}
 
 	CloseRegistry();
@@ -269,14 +269,6 @@ void save_new_tomb5_settings()
 	REG_WriteLong(buf, tomb5.uw_dust);
 
 	CloseRegistry();
-}
-
-void RPC_Init()
-{
-	DiscordEventHandlers handlers;
-
-	memset(&handlers, 0, sizeof(handlers));
-	Discord_Initialize("959220032787869751", &handlers, 1, 0);
 }
 
 const char* RPC_GetLevelName()
@@ -377,26 +369,3 @@ const char* RPC_GetHealthPercentage()
 	return buf;
 }
 
-void RPC_Update()
-{
-	DiscordRichPresence RPC;
-
-	memset(&RPC, 0, sizeof(RPC));
-
-	RPC.details = RPC_GetLevelName();
-	RPC.largeImageKey = RPC_GetLevelPic();
-	RPC.largeImageText = gfCurrentLevel == LVL5_COLOSSEUM ? "BOO" : RPC.details;	//xoxo
-
-	RPC.smallImageKey = RPC_GetHealthPic();
-	RPC.smallImageText = RPC_GetHealthPercentage();
-
-	RPC.state = RPC_GetTimer();
-
-	RPC.instance = 1;
-	Discord_UpdatePresence(&RPC);
-}
-
-void RPC_close()
-{
-	Discord_Shutdown();
-}

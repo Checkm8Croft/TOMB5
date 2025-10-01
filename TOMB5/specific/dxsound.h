@@ -1,6 +1,8 @@
 #pragma once
 #include "../global/types.h"
+#include <stdint.h>
 
+// ===== Function prototypes =====
 bool DXChangeOutputFormat(long nSamplesPerSec, bool force);
 void DSChangeVolume(long num, long volume);
 void DSAdjustPitch(long num, long pitch);
@@ -23,6 +25,22 @@ void DXFreeSounds();
 long S_SoundSampleIsPlaying(long num);
 void S_SoundSetPanAndVolume(long num, short pan, ushort volume);
 void S_SoundSetPitch(long num, long pitch);
-bool DXCreateSample(long num, LPWAVEFORMATEX format, void* data, ulong bytes);
 
+// ===== Globals =====
 extern char* samples_buffer;
+extern struct FakeDSBuffer* DSPrimary;
+
+// ===== Fake DirectSound types =====
+typedef struct FakeDSBuffer FakeDSBuffer;
+typedef FakeDSBuffer* LPDIRECTSOUNDBUFFER;
+
+// ===== Fake ACM =====
+typedef void* HACMSTREAM;
+typedef int   MMRESULT;
+
+// ===== Constants =====
+#define DS_OK                 0
+#define WAVE_FORMAT_PCM       1
+#define DSBCAPS_PRIMARYBUFFER 1
+#define DSBPLAY_LOOPING       2
+#define DSSCL_EXCLUSIVE       3

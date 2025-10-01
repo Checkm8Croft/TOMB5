@@ -465,6 +465,7 @@ struct GLVERTEX {
     ulong specular;        // specular color (unused, compatibilità)
     float tu, tv;          // texture coordinates
 };
+typedef struct { float r, g, b, a; } ColorF;
 
 struct SPHERE
 {
@@ -687,6 +688,10 @@ struct SoundSlot
 	long nSampleInfo;
 	ulong distance;
 	PHD_VECTOR pos;
+    int volume;
+    int flags;
+	long frequency;
+	long playing;
 };
 
 struct BOX_NODE
@@ -1688,7 +1693,45 @@ struct ENVUV
 	float u;
 	float v;
 };
-typedef struct { int width, height, format; } SurfaceDesc;
+	struct DDSCaps {
+		unsigned long dwCaps;
+	};
+	typedef struct { 
+		int format; 
+		int bitsPerPixel;
+		uint32_t dwRBitMask;
+		uint32_t dwGBitMask;
+		uint32_t dwBBitMask;
+		uint32_t dwRGBAlphaBitMask;
+		uint32_t dwRGBBitCount;
+		uint32_t ddpfPixelFormat;
+		uint32_t dwSize;
+		uint32_t dwFlags;
+		uint32_t dwFourCC;
+	} PixelFormat;
+	typedef struct { int width, height, format; PixelFormat ddpfPixelFormat;
+		void* lpSurface;
+		DDSCaps ddsCaps;
+		uint32_t dwRefreshRate;
+		uint32_t dwSize;
+		uint32_t dwFlags;
+		uint32_t dwHeight;
+		uint32_t dwWidth;
+		int32_t  lPitch;
+		uint32_t dwBackBufferCount;
+
+	} SurfaceDesc;
+#define DDLOCK_WAIT 0
+#define DDLOCK_NOSYSLOCK 0
+
+static int FakeLock(SurfaceDesc* desc, SurfaceDesc* out)
+ {
+    *out = *desc; // copia i campi
+    return 0;
+}
+static void FakeUnlock(SurfaceDesc* desc) {
+    // niente da fare
+}
 struct DXDISPLAYMODE
 {
 	long w;
@@ -1704,7 +1747,6 @@ struct DXDISPLAYMODE
 	uchar gshift;
 	uchar bshift;
 };
-typedef struct { int format; int bitsPerPixel; } PixelFormat;
 struct DXTEXTUREINFO
 {
 	PixelFormat ddpf;
@@ -1790,7 +1832,10 @@ typedef struct {} DrawDevice; // stub
 typedef struct {} D3DInterface;
 // Surfaces
 // DirectX: LPDIRECTDRAWSURFACE4 lpPrimaryBuffer, lpBackBuffer, lpZBuffer;
-typedef struct {} Surface; // stub generico
+typedef struct {
+	int dummy;
+	GLuint gl_id;
+} Surface; // stub generico
 Surface* lpPrimaryBuffer;
 Surface* lpBackBuffer;
 Surface* lpZBuffer; // depth buffer gestito in OpenGL
@@ -1804,7 +1849,10 @@ Viewport lpViewport;
 // DirectX: LPDIRECTSOUND lpDS;
 typedef unsigned int AudioDeviceID; // SDL2: audio device
 AudioDeviceID lpDS;
-typedef struct { int left, top, right, bottom; } Rect;
+typedef struct {long left;
+    long top;
+    long right;
+    long bottom; } Rect, *LPRECT;
 Rect rViewport;
 typedef struct {} HInstance; // stub
 typedef struct {} HWindow;   // stub
@@ -1813,6 +1861,11 @@ typedef struct {} WndClass;  // stub
 HInstance hInstance;
 HWindow hWnd;
 WndClass WindowClass;
+typedef struct {
+    GLuint zBuffer;
+	GLuint textures[8];
+    int activeTexture;
+} GLDevice;
 struct DXPTR
 {
 	DrawDevice* lpDD;
@@ -1838,6 +1891,7 @@ struct DXPTR
 	volatile long InScene;
 	volatile long WaitAtBeginScene;
 	volatile long DoneBlit;
+	GLDevice gl;
 };
 typedef struct {} D3DMaterial;
 D3DMaterial* GlobalMaterial;
@@ -2359,12 +2413,7 @@ struct FOGBULB_STRUCT	//fog data used to apply fog on vertices
 // D3DVALUE / D3DCOLOR (C puro)
 typedef float D3DVALUE;
 
-typedef struct {
-    D3DVALUE r;
-    D3DVALUE g;
-    D3DVALUE b;
-    D3DVALUE a;
-} D3DCOLOR;
+typedef uint32_t D3DCOLOR;
 
 struct D3DTLBUMPVERTEX
 {
@@ -2454,12 +2503,6 @@ struct THREAD
 	ulong address;
 };
 
-struct DS_SAMPLE
-{
-	SoundSlot buffer;
-	long frequency;
-	long playing;
-};
 
 struct COMMANDLINES
 {
@@ -2595,17 +2638,7 @@ struct tomb5_options	//only bools or ulongs because that's what registry likes
 	bool static_lighting;		//on off
 	ulong uw_dust;				//1-> off, 2-> original, 3-> TR4
 };
-typedef struct {
-    uint16_t wFormatTag;        // formato audio (PCM = 1)
-    uint16_t nChannels;         // numero di canali (1 = mono, 2 = stereo)
-    uint32_t nSamplesPerSec;    // frequenza (es: 44100 Hz)
-    uint32_t nAvgBytesPerSec;   // byte per secondo (per buffering)
-    uint16_t nBlockAlign;       // dimensione di un frame (channels * bytesPerSample)
-    uint16_t wBitsPerSample;    // bits per campione (8, 16, 24, 32)
-    uint16_t cbSize;            // extra info (per formati compressi, 0 per PCM)
-} WAVEFORMATEX;
 
-typedef WAVEFORMATEX* LPWAVEFORMATEX;
 
 typedef void* HBITMAP;    // un puntatore generico
 typedef const char* LPCSTR;
@@ -2617,7 +2650,6 @@ struct D3DMATRIX { float _11,_12,_13,_14; float _21,_22,_23,_24; float _31,_32,_
 struct D3DVECTOR { float x, y, z; }; typedef D3DVECTOR* LPD3DVECTOR;
 typedef GLVERTEX D3DTLVERTEX;
 typedef GLVERTEX* LPD3DTLVERTEX;
-typedef D3DCOLOR* LPD3DCOLOR;
 typedef float* LPD3DVALUE;
 
 #define DIK_C     SDL_SCANCODE_C
@@ -2641,5 +2673,162 @@ typedef float* LPD3DVALUE;
 #define DIK_H     SDL_SCANCODE_H
 #define DIK_A     SDL_SCANCODE_A
 #define DIK_L     SDL_SCANCODE_L
+#define DIK_F	  SDL_SCANCODE_F
+#define DIK_1     SDL_SCANCODE_1
+#define DIK_2     SDL_SCANCODE_2
+#define DIK_3     SDL_SCANCODE_3
+#define DIK_4     SDL_SCANCODE_4
+#define DIK_RETURN	SDL_SCANCODE_RETURN
+#define DIK_LEFT	SDL_SCANCODE_LEFT
+#define DIK_RIGHT	SDL_SCANCODE_RIGHT
+#define DIK_UP		SDL_SCANCODE_UP
+#define DIK_DOWN	SDL_SCANCODE_DOWN
 #define DIK_ESC   SDL_SCANCODE_ESCAPE
 #define DIK_ESCAPE SDL_SCANCODE_ESCAPE
+#define DIK_SPACE SDL_SCANCODE_SPACE
+#define DIK_TAB   SDL_SCANCODE_TAB
+#define DIK_PGUP  SDL_SCANCODE_PAGEUP
+#define DIK_PGDN  SDL_SCANCODE_PAGEDOWN
+#define DIK_HOME  SDL_SCANCODE_HOME
+#define DIK_END   SDL_SCANCODE_END
+#define DIK_INSERT SDL_SCANCODE_INSERT
+#define DIK_DELETE SDL_SCANCODE_DELETE
+#define DIK_LSHIFT SDL_SCANCODE_LSHIFT
+#define DIK_RSHIFT SDL_SCANCODE_RSHIFT
+#define DIK_F1    SDL_SCANCODE_F1
+#define DIK_F2    SDL_SCANCODE_F2
+#define DIK_F3    SDL_SCANCODE_F3
+#define DIK_F4    SDL_SCANCODE_F4
+#define DIK_F5    SDL_SCANCODE_F5
+#define DIK_F6    SDL_SCANCODE_F6
+#define DIK_F7    SDL_SCANCODE_F7
+#define DIK_F8    SDL_SCANCODE_F8
+#define DIK_F9    SDL_SCANCODE_F9
+#define DIK_F10   SDL_SCANCODE_F10
+#define DIK_F11   SDL_SCANCODE_F11
+#define DIK_F12   SDL_SCANCODE_F12
+#define DIK_MINUS SDL_SCANCODE_MINUS
+#define DIK_EQUALS SDL_SCANCODE_EQUALS
+#define DIK_BACKSLASH SDL_SCANCODE_BACKSLASH
+#define DIK_COMMA SDL_SCANCODE_COMMA
+#define DIK_PERIOD SDL_SCANCODE_PERIOD
+#define DIK_SLASH SDL_SCANCODE_SLASH
+#define DIK_SEMICOLON SDL_SCANCODE_SEMICOLON
+#define DIK_APOSTROPHE SDL_SCANCODE_APOSTROPHE
+#define DIK_GRAVE SDL_SCANCODE_GRAVE
+#define DIK_LBRACKET SDL_SCANCODE_LEFTBRACKET
+#define DIK_RBRACKET SDL_SCANCODE_RIGHTBRACKET
+#define DIK_NUMPAD0 SDL_SCANCODE_KP_0
+#define DIK_NUMPAD1 SDL_SCANCODE_KP_1
+#define DIK_NUMPAD2 SDL_SCANCODE_KP_2
+#define DIK_NUMPAD3 SDL_SCANCODE_KP_3
+#define DIK_NUMPAD4 SDL_SCANCODE_KP_4
+#define DIK_NUMPAD5 SDL_SCANCODE_KP_5
+#define DIK_NUMPAD6 SDL_SCANCODE_KP_6
+#define DIK_NUMPAD7 SDL_SCANCODE_KP_7
+#define DIK_NUMPAD8 SDL_SCANCODE_KP_8
+#define DIK_NUMPAD9 SDL_SCANCODE_KP_9
+#define DIK_NUMPADENTER SDL_SCANCODE_KP_ENTER
+#define DIK_NUMPADMINUS SDL_SCANCODE_KP_MINUS
+#define DIK_NUMPADPLUS SDL_SCANCODE_KP_PLUS
+#define DIK_NUMPADPERIOD SDL_SCANCODE_KP_PERIOD
+#define DIK_NUMPADMULTIPLY SDL_SCANCODE_KP_MULTIPLY
+#define DIK_NUMPADDIVIDE SDL_SCANCODE_KP_DIVIDE
+#define DIK_LCONTROL SDL_SCANCODE_LCTRL
+#define DIK_RCONTROL SDL_SCANCODE_RCTRL
+#define DIK_RMENU SDL_SCANCODE_APPLICATION
+#define DIK_LMENU SDL_SCANCODE_LALT
+#define DIK_CAPSLOCK SDL_SCANCODE_CAPSLOCK
+#define DIK_SCROLL SDL_SCANCODE_SCROLLLOCK
+#define DIK_NUMLOCK SDL_SCANCODE_NUMLOCKCLEAR
+#define DIK_PRINTSCREEN SDL_SCANCODE_PRINTSCREEN
+#define DIK_PAUSE SDL_SCANCODE_PAUSE
+#define DIK_0 SDL_SCANCODE_0
+#define DIK_5 SDL_SCANCODE_5
+#define DIK_6 SDL_SCANCODE_6
+#define DIK_7 SDL_SCANCODE_7
+#define DIK_8 SDL_SCANCODE_8
+#define DIK_9 SDL_SCANCODE_9
+#define DIK_10 SDL_SCANCODE_0
+
+typedef float Matrix4x4[4][4];
+void SetViewMatrix(Matrix4x4* mat) {
+    // In OpenGL classico
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixf((const float*)mat);
+}
+typedef char* LPSTR;
+#define __stdcall
+// FVF flags (finti, giusto per compilare)
+#define D3DFVF_TEX2     0x00000100
+#define D3DFVF_SPECULAR 0x00000020
+#define D3DFVF_DIFFUSE  0x00000040
+#define D3DFVF_XYZRHW   0x00000200
+
+#define FVF (D3DFVF_TEX2 | D3DFVF_SPECULAR | D3DFVF_DIFFUSE | D3DFVF_XYZRHW)
+
+// Primitive types
+#define D3DPT_TRIANGLELIST 3
+
+// Draw flags
+#define D3DDP_DONOTCLIP         0x00000001
+#define D3DDP_DONOTUPDATEEXTENTS 0x00000002
+
+// Render states (mock)
+#define D3DRENDERSTATE_TEXTUREPERSPECTIVE 0x1000
+// Pixel formats
+#define DDPF_RGB        0x00000040
+
+// Surface description flags
+#define DDSD_PIXELFORMAT 0x00001000
+#define DDSD_HEIGHT      0x00000002
+#define DDSD_WIDTH       0x00000004
+#define DDSD_CAPS        0x00000001
+
+// Caps
+#define DDSCAPS_OFFSCREENPLAIN 0x00000040
+#define DDSCAPS_SYSTEMMEMORY   0x00000800
+
+extern int MusicVolume;
+#define RGBA_SETALPHA(c, a) (((c) & 0x00FFFFFF) | ((a) << 24))
+#define RGBA_GETALPHA(c)   (((c) >> 24) & 0xFF)
+// Stub DirectX COM-like structs
+struct Direct3D3      {};
+struct Direct3DDevice3{};
+struct DirectDraw4    {};
+
+// Typedef "LP" = pointer
+typedef Direct3D3*       LPDIRECT3D3;
+typedef Direct3DDevice3* LPDIRECT3DDEVICE3;
+typedef DirectDraw4*     LPDIRECTDRAW4;
+typedef Surface*         LPDIRECTDRAWSURFACE4;
+typedef D3DMaterial*     LPD3DMATERIAL3;
+typedef DXTEXTURE*       LPDIRECTDRAWTEXTURE;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE2;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE3;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE8;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE9;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE10;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE11;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE12;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE13;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE14;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE15;
+typedef DXTEXTURE*       LPDIRECT3DTEXTURE16;
+
+GLDevice gl;
+GLuint CreateZBuffer(int width, int height) {
+	GLuint zBuffer;
+	glGenRenderbuffers(1, &zBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, zBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	return zBuffer;
+}
+
+typedef struct {
+    DXPTR dx;       // vecchio wrapper DirectX
+    GLDevice gl;    // nuovo wrapper OpenGL
+    int Filtering;
+} AppStruct;
