@@ -28,6 +28,9 @@
 #include "spotcam.h"
 #include "../specific/dxshell.h"
 #include "savegame.h"
+#include <SDL2/SDL.h>
+
+
 
 static RINGME* rings[2];
 static RINGME pcring1;

@@ -1,6 +1,9 @@
 #pragma once
 #include "../global/types.h"
+#include <SDL2/SDL_mixer.h>
 
+const int MAX_SOUNDS = 128;      // numero massimo di effetti sonori
+extern Mix_Chunk* g_Sounds[MAX_SOUNDS];  // array globale dei suoni caricati
 void SoundEffectCS(long sfx, PHD_3DPOS* pos, long flags);
 void SayNo();
 void SOUND_Init();

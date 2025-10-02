@@ -46,6 +46,34 @@
 #include "../specific/output.h"
 #include "../specific/gamemain.h"
 #include "../tomb5/tomb5.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+
+const Uint8* keymap = nullptr;
+
+
+
+
+
+
+void CreateMonoScreen()
+{
+
+    // Dimensioni fisse o legate alla finestra di gioco
+    int width  = 640;
+    int height = 480;
+    // Creiamo una palette in scala di grigi
+    SDL_Color palette[256];
+    for (int i = 0; i < 256; i++) {
+        palette[i].r = i;
+        palette[i].g = i;
+        palette[i].b = i;
+        palette[i].a = 255;
+    }
+
+
+    SDL_Log("CreateMonoScreen: superficie monocromatica %dx%d creata", width, height);
+}
 
 uchar ShatterSounds[18][10] =
 {
@@ -249,7 +277,6 @@ long ControlPhase(long nframes, long demo_mode)
 	{
 		GlobalCounter++;
 		UpdateSky();
-		RPC_Update();
 
 		if (S_UpdateInput() == IN_ALL)
 			return 0;

@@ -6,6 +6,7 @@ long S_LoadGame(long slot_num);
 bool GameInitialise();
 unsigned int GameMain(void* ptr);
 void GameClose();
+extern unsigned char* ADPCMBuffer;
 
 extern WATERTAB WaterTable[22][64];
 extern THREAD MainThread;

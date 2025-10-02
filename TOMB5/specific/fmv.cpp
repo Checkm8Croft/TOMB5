@@ -14,6 +14,38 @@
 #include "gamemain.h"
 #include "LoadSave.h"
 #include "setupdlg.h"
+#include <SDL2/SDL.h>
+
+SDL_Window* g_Window = nullptr;
+int g_VideoWidth = 800;
+int g_VideoHeight = 600;
+bool g_Fullscreen = true;
+bool fmvs_disabled= false;
+
+long DXChangeVideoMode()
+{
+    if (!g_Window) return -1;
+
+    Uint32 flags = g_Fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
+
+    // Cambia la risoluzione della finestra
+    SDL_SetWindowSize(g_Window, g_VideoWidth, g_VideoHeight);
+
+    // Imposta fullscreen/windowed
+    if (SDL_SetWindowFullscreen(g_Window, flags) != 0) {
+        SDL_Log("Errore nel cambiare fullscreen: %s", SDL_GetError());
+        return -1;
+    }
+
+    // Aggiorna il renderer (se serve)
+    SDL_Renderer* renderer = SDL_GetRenderer(g_Window);
+    if (renderer) {
+        SDL_RenderSetLogicalSize(renderer, g_VideoWidth, g_VideoHeight);
+    }
+
+    return 0; // successo
+}
+
 
 #define GET_DLL_PROC(dll, proc, n) \
 { \
@@ -65,14 +97,12 @@ long PlayFmv(long num)
 	strcat(path, name);
 	Log("PlayFMV %s", path);
 	App.fmv = 1;
-	modes = G_dxinfo->DDInfo[App.DXInfo.nDD].D3DDevices[App.DXInfo.nD3D].DisplayModes;
 	rm = 0;
 	dm = App.DXInfo.nDisplayMode;
 	current = &modes[dm];
 
 	if (current->bpp != 16 || current->w != 640 || current->h != 480)
 	{
-		ndms = G_dxinfo->DDInfo[G_dxinfo->nDD].D3DDevices[G_dxinfo->nD3D].nDisplayModes;
 
 		for (int i = 0; i < ndms; i++, modes++)
 		{

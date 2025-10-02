@@ -69,13 +69,6 @@ void HWInitialise()
 {
 	Log(__FUNCTION__);
 
-	for(int stage = 0; stage < 8; ++stage) {
-        GL_SetTextureStageState(&App.dx.gl, stage, D3DTSS_COLOROP, D3DTOP_DISABLE);
-    }
-
-    GL_SetTextureStageState(&App.dx.gl, 0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
-    GL_SetTextureStageState(&App.dx.gl, 0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-    GL_SetTextureStageState(&App.dx.gl, 0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 
 
     // tutte le altre texture/alpha arg ignorate, perché OpenGL fixed function li usa direttamente

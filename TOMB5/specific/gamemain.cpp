@@ -20,6 +20,8 @@ THREAD MainThread;
 float vert_wibble_table[32];
 short* clipflags;
 long SaveCounter;
+unsigned char* ADPCMBuffer = nullptr;
+unsigned char* wav_file_buffer = nullptr;
 
 static ushort GetRandom(WATERTAB* wt, long lp)
 {
@@ -191,12 +193,10 @@ unsigned int __stdcall GameMain(void* ptr)
 		if (!App.SoundDisabled)
 			SOUND_Init();
 
-		RPC_Init();
 		init_tomb5_stuff();
 		DoGameflow();
 		GameClose();
 		S_CDStop();
-		RPC_close();
 
 SDL_Event event;
 event.type = SDL_QUIT;

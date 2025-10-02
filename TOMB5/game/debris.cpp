@@ -300,7 +300,6 @@ void ShatterObject(SHATTER_ITEM* shatter_item, MESH_INFO* StaticMesh, short Num,
 		v1 *= 3;
 		v2 *= 3;
 		v3 *= 3;
-		tex = (TEXTURESTRUCT*)*face_data++;
 		DebrisMeshFlags = *face_data++;
 
 		if (v1 < 0x300 && v2 < 0x300 && v3 < 0x300 && (!rnd || rnd == 1 && GetRandomControl() & 1))

@@ -7,6 +7,87 @@
 #include "deltapak.h"
 #include "camera.h"
 #include "control.h"
+#include <SDL2/SDL_mixer.h>
+
+Mix_Chunk* g_Sounds[MAX_SOUNDS] = { nullptr };
+
+long S_SoundPlaySampleLooped(long num, unsigned short volume, long pitch, short pan)
+{
+    if (num < 0 || num >= MAX_SOUNDS)
+        return -1;
+
+    Mix_Chunk* chunk = g_Sounds[num];
+    if (!chunk)
+        return -1;
+
+    // Imposta pan e volume usando la funzione già creata
+    S_SoundSetPanAndVolume(num, pan, volume);
+
+    // Loop infinito = -1
+    if (Mix_PlayChannel(num, chunk, -1) == -1)
+    {
+        SDL_Log("Failed to play sound looped: %s", Mix_GetError());
+        return -1;
+    }
+
+    return num;
+}
+
+
+long S_SoundSampleIsPlaying(long num)
+{
+    if (num < 0 || num >= MAX_SOUNDS)
+        return 0;
+
+    // Mix_Playing ritorna 1 se il canale è attivo, 0 se no
+    return Mix_Playing(num) ? 1 : 0;
+}
+
+
+void S_SoundStopAllSamples()
+{
+    // Ferma tutti i canali in SDL2_mixer
+    Mix_HaltChannel(-1);
+}
+
+
+void S_SoundStopSample(long num)
+{
+    if (num < 0 || num >= MAX_SOUNDS) return;
+
+    Mix_Chunk* chunk = g_Sounds[num];
+    if (!chunk) return;
+
+    // Cicla su tutti i canali attivi e ferma quelli che riproducono questo chunk
+    int totalChannels = Mix_AllocateChannels(-1); // numero di canali attivi
+    for (int ch = 0; ch < totalChannels; ++ch) {
+        if (Mix_GetChunk(ch) == chunk) {
+            Mix_HaltChannel(ch);
+        }
+    }
+}
+long S_SoundPlaySample(long num, unsigned short volume, long pitch, short pan)
+{
+    if (num < 0 || num >= MAX_SOUNDS) return -1;
+    Mix_Chunk* chunk = g_Sounds[num];
+    if (!chunk) return -1;
+
+    // Regola il volume (0-128)
+    int sdlVolume = (volume * 128) / 100; // converti percentuale a SDL volume
+    Mix_VolumeChunk(chunk, sdlVolume);
+
+    // Imposta il pan (0 = sinistra, 128 = destra, 255 = mono)
+    Uint8 left = 255, right = 255;
+    if (pan < 0) pan = 0;
+    if (pan > 255) pan = 255;
+    left = 255 - pan;
+    right = pan;
+    Mix_SetPanning(-1, left, right); // -1 = primo canale libero
+
+    // Riproduci il suono sul primo canale libero
+    int channel = Mix_PlayChannel(-1, chunk, 0); // 0 = no loop
+    return channel;
+}
 
 SAMPLE_INFO* sample_infos;
 SoundSlot LaSlot[32];

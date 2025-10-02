@@ -20,7 +20,7 @@ long CalcVolume(long volume);
 void S_SoundStopAllSamples();
 void S_SoundStopSample(long num);
 long S_SoundPlaySample(long num, ushort volume, long pitch, short pan);
-long S_SoundPlaySampleLooped(long num, ushort volume, long pitch, short pan);
+long S_SoundPlaySampleLooped(long num, unsigned short volume, long pitch, short pan);
 void DXFreeSounds();
 long S_SoundSampleIsPlaying(long num);
 void S_SoundSetPanAndVolume(long num, short pan, ushort volume);

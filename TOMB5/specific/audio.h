@@ -5,6 +5,8 @@
 #include <SDL2/SDL_mixer.h>
 #include <stdbool.h>
 
+extern int MusicVolume;
+
 // Simuliamo i driver ACM con SDL2
 typedef void* HACMDRIVER;
 typedef int HACMDRIVERID;

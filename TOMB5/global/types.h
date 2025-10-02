@@ -10,6 +10,14 @@
 #include <pthread.h>
 #include <stdint.h>
 #include <SDL2/SDL_scancode.h>
+#include <SDL2/SDL.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+struct SDL_Surface;   // forward declaration — non serve includere SDL.h qui
+#ifdef __cplusplus
+}	
+#endif
 #pragma pack(push, 1)
 /*macros*/
 #define SQUARE(x) ((x)*(x))
@@ -1719,6 +1727,7 @@ struct ENVUV
 		uint32_t dwWidth;
 		int32_t  lPitch;
 		uint32_t dwBackBufferCount;
+    int bpp;  // bits per pixel
 
 	} SurfaceDesc;
 #define DDLOCK_WAIT 0
@@ -1786,20 +1795,15 @@ struct DXD3DDEVICE
 	DXZBUFFERINFO* ZBufferInfos;
 };
 typedef struct {} InputDevice; // stub SDL_Event gestirà input
-InputDevice* lpDirectInput;
-InputDevice* Keyboard;
-InputDevice* Joystick;
 typedef float D3DVALUE;
 typedef struct { int caps; int minWidth, minHeight; int maxWidth, maxHeight; } DDCaps;
 typedef struct { char driverName[256]; char description[256]; unsigned int vendorId; } DDDeviceIdentifier;
-DDDeviceIdentifier DDIdentifier;
 struct DXDIRECTDRAWINFO
 {
 	char Name[256];  
 	char About[256];
 	GUID* lpGuid;
 	GUID Guid;
-	DDDeviceIdentifier DDIdentifier;
 	long nDisplayModes;
 	DXDISPLAYMODE* DisplayModes;
 	long nD3DDevices;
@@ -1832,35 +1836,27 @@ typedef struct {} DrawDevice; // stub
 typedef struct {} D3DInterface;
 // Surfaces
 // DirectX: LPDIRECTDRAWSURFACE4 lpPrimaryBuffer, lpBackBuffer, lpZBuffer;
+#undef Surface
 typedef struct {
 	int dummy;
 	GLuint gl_id;
+	SDL_Surface* sdlSurface;
 } Surface; // stub generico
-Surface* lpPrimaryBuffer;
-Surface* lpBackBuffer;
-Surface* lpZBuffer; // depth buffer gestito in OpenGL
 
-// Viewport
-// DirectX: LPDIRECT3DVIEWPORT3 lpViewport;
-typedef struct { int x, y, width, height; } Viewport;
-Viewport lpViewport;
+
 
 // DirectSound
 // DirectX: LPDIRECTSOUND lpDS;
 typedef unsigned int AudioDeviceID; // SDL2: audio device
-AudioDeviceID lpDS;
 typedef struct {long left;
     long top;
     long right;
     long bottom; } Rect, *LPRECT;
-Rect rViewport;
 typedef struct {} HInstance; // stub
 typedef struct {} HWindow;   // stub
 typedef struct {} WndClass;  // stub
 
-HInstance hInstance;
-HWindow hWnd;
-WndClass WindowClass;
+
 typedef struct {
     GLuint zBuffer;
 	GLuint textures[8];
@@ -1871,46 +1867,25 @@ struct DXPTR
 	DrawDevice* lpDD;
 	D3DInterface* lpD3D;
 	D3DInterface lpD3DDevice;
-	DrawDevice lpPrimaryBuffer;
-	DrawDevice lpBackBuffer;
-	DrawDevice lpZBuffer;
-	DrawDevice lpViewport;
-	AudioDeviceID lpDS;
 	ulong dwRenderWidth;
 	ulong dwRenderHeight;
-	Rect rViewport;
 	Rect rScreen;
 	long Flags;
 	ulong WindowStyle;
 	long CoopLevel;
-
-	InputDevice* lpDirectInput;
-	InputDevice* Keyboard;
 	InputDevice* Joystick;
-	HWindow hWnd;
 	volatile long InScene;
 	volatile long WaitAtBeginScene;
 	volatile long DoneBlit;
-	GLDevice gl;
 };
 typedef struct {} D3DMaterial;
-D3DMaterial* GlobalMaterial;
 typedef unsigned int D3DMaterialHandle;
-D3DMaterialHandle GlobalMaterialHandle;
-typedef struct {} HAccel;
-HAccel hAccel;
 struct WINAPP
 {
-	HInstance hInstance;
-	HWindow hWnd;
-	WndClass WindowClass;
 	DXINFO DXInfo;
 	DXPTR dx;
 	pthread_mutex_t mutex;
 	float fps;
-	D3DMaterial* GlobalMaterial;
-	D3DMaterialHandle GlobalMaterialHandle;
-	HAccel hAccel;
 	bool SetupComplete;
 	bool BumpMapping;
 	long TextureSize;
@@ -2752,11 +2727,7 @@ typedef float* LPD3DVALUE;
 #define DIK_10 SDL_SCANCODE_0
 
 typedef float Matrix4x4[4][4];
-void SetViewMatrix(Matrix4x4* mat) {
-    // In OpenGL classico
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf((const float*)mat);
-}
+
 typedef char* LPSTR;
 #define __stdcall
 // FVF flags (finti, giusto per compilare)
@@ -2789,7 +2760,6 @@ typedef char* LPSTR;
 #define DDSCAPS_OFFSCREENPLAIN 0x00000040
 #define DDSCAPS_SYSTEMMEMORY   0x00000800
 
-extern int MusicVolume;
 #define RGBA_SETALPHA(c, a) (((c) & 0x00FFFFFF) | ((a) << 24))
 #define RGBA_GETALPHA(c)   (((c) >> 24) & 0xFF)
 // Stub DirectX COM-like structs
@@ -2817,18 +2787,9 @@ typedef DXTEXTURE*       LPDIRECT3DTEXTURE14;
 typedef DXTEXTURE*       LPDIRECT3DTEXTURE15;
 typedef DXTEXTURE*       LPDIRECT3DTEXTURE16;
 
-GLDevice gl;
-GLuint CreateZBuffer(int width, int height) {
-	GLuint zBuffer;
-	glGenRenderbuffers(1, &zBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, zBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	return zBuffer;
-}
+
 
 typedef struct {
     DXPTR dx;       // vecchio wrapper DirectX
-    GLDevice gl;    // nuovo wrapper OpenGL
     int Filtering;
 } AppStruct;

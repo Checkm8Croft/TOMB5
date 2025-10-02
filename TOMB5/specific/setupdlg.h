@@ -5,7 +5,7 @@
 extern bool start_setup;
 extern bool fmvs_disabled;
 
-bool SetupDialog();
+extern bool SetupDialog;
 typedef struct {
     int graphicsAdapter;
     int d3dDevice;

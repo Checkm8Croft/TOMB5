@@ -97,6 +97,12 @@ static void aInitMatrix()
 	aMXPtr = aFMatrixStack;
 }
 
+void SetViewMatrix(Matrix4x4* mat) {
+    // In OpenGL classico
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixf((const float*)mat);
+}
+
 void aSetViewMatrix()
 {
 	SetD3DMatrix(&D3DMView, aMXPtr);

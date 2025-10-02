@@ -26,10 +26,91 @@
 #include "../tomb5/troyestuff.h"
 #include "../tomb5/tomb5.h"
 #include "drawbars.h"
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL.h>
+
+
+bool InitSampleDecompress()
+{
+    // In SDL2_mixer non serve inizializzare nulla manualmente
+    return true;
+}
+
+bool FreeSampleDecompress()
+{
+    // In SDL2_mixer non serve liberare nulla manualmente
+    return true;
+}
+
+
+bool DXChangeOutputFormat(long nSamplesPerSec, bool force)
+{
+    // SDL2_mixer non permette di cambiare la frequenza a runtime.
+    // Se force è true, possiamo ri-inizializzare l'audio
+    if (force)
+    {
+        Mix_CloseAudio();
+        if (Mix_OpenAudio(nSamplesPerSec, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
+        {
+            SDL_Log("Impossibile aprire SDL_mixer: %s", Mix_GetError());
+            return false;
+        }
+    }
+    return true; // restituiamo true come stub
+}
+
+
+bool DSIsChannelPlaying(long num)
+{
+    if (num < 0 || num >= MAX_SOUNDS) return false;
+
+    Mix_Chunk* chunk = g_Sounds[num];
+    if (!chunk) return false;
+
+    int totalChannels = Mix_AllocateChannels(-1); // numero di canali attivi
+    for (int ch = 0; ch < totalChannels; ++ch) {
+        if (Mix_GetChunk(ch) == chunk && Mix_Playing(ch)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+long DXCreateSurface(DrawDevice dd, SurfaceDesc desc, Surface* surf)
+{
+    surf->sdlSurface = SDL_CreateRGBSurface(
+        0,
+        desc.width,
+        desc.height,
+        desc.bpp,
+        0x00FF0000,
+        0x0000FF00,
+        0x000000FF,
+        0xFF000000
+    );
+
+    if (!surf->sdlSurface) {
+        SDL_Log("DXCreateSurface failed: %s", SDL_GetError());
+        return -1;
+    }
+
+    return 0;
+}
+
+
+void DSChangeVolume(long num, long volume)
+{
+    // Clamp del volume tra 0 e MIX_MAX_VOLUME (128)
+    if (volume < 0) volume = 0;
+    if (volume > MIX_MAX_VOLUME) volume = MIX_MAX_VOLUME;
+
+    // num = canale
+    Mix_Volume((int)num, (int)volume);
+}
 
 long sfx_frequencies[3] = { 11025, 22050, 44100 };
 long SoundQuality = 1;
-int MusicVolume = 40;
 long SFXVolume = 80;
 long ControlMethod;
 
@@ -1049,7 +1130,8 @@ void S_DisplayMonoScreen()
 				col = 0xFFFFFF80;
 		}
 
-		S_DrawTile(0, 0, phd_winxmax, phd_winymax, MonoScreen.tex, 0, 0, 256, 256, col, col, col, col);
+		S_DrawTile(0, 0, phd_winxmax, phd_winymax, &MonoScreen.tex, 0, 0, 256, 256, col, col, col, col);
+
 	}
 }
 
@@ -1177,7 +1259,6 @@ void LoadScreen(long screen, long pathNum)
 		Surface_Unlock(&screen_surface, 0);
 		free(pic);
 		MonoScreenOn = 2;
-		ConvertSurfaceToTextures(screen_surface);
 	}
 	else
 		Log("WHORE!");

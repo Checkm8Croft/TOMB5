@@ -31,7 +31,26 @@
 #include "lara.h"
 #include "savegame.h"
 #include "../tomb5/tomb5.h"
+#include <SDL2/SDL_mixer.h>
+#include "sound.h"
 
+#define SYNC_CHANNEL 0  // canale dedicato alla traccia sincronizzata
+
+void S_StartSyncedAudio(long track)
+{
+    if (track < 0 || track >= MAX_SOUNDS) return;
+
+    Mix_Chunk* chunk = g_Sounds[track];
+    if (!chunk) return;
+
+    // Ferma eventuale traccia precedente su questo canale
+    if (Mix_Playing(SYNC_CHANNEL)) {
+        Mix_HaltChannel(SYNC_CHANNEL);
+    }
+
+    // Avvia la traccia sul canale sincronizzato
+    Mix_PlayChannel(SYNC_CHANNEL, chunk, 0); // 0 = non loop
+}
 ushort old_lara_LHolster;
 
 long nSpecialCut;

@@ -15,6 +15,64 @@
 #include "../game/gameflow.h"
 #include "../game/newinv2.h"
 #include "../tomb5/tomb5.h"
+#include <SDL2/SDL.h>
+
+SDL_Joystick* g_Joystick = nullptr;
+
+// Inizializzazione joystick (chiamare una volta all'avvio)
+void InitJoystick()
+{
+    if (SDL_NumJoysticks() > 0) {
+        g_Joystick = SDL_JoystickOpen(0);
+        if (!g_Joystick)
+            SDL_Log("Impossibile aprire joystick: %s", SDL_GetError());
+    }
+}
+
+long DXUpdateJoystick()
+{
+    if (!g_Joystick) return 0;
+
+    SDL_JoystickUpdate(); // Aggiorna lo stato del joystick
+
+    long state = 0;
+
+    // Esempio: assi principali, convertiti in bitmask
+    Sint16 axisX = SDL_JoystickGetAxis(g_Joystick, 0);
+    Sint16 axisY = SDL_JoystickGetAxis(g_Joystick, 1);
+
+    // Normalizziamo l’input su -1, 0, 1
+    int xDir = (axisX > 8000) ? 1 : (axisX < -8000 ? -1 : 0);
+    int yDir = (axisY > 8000) ? 1 : (axisY < -8000 ? -1 : 0);
+
+    // Bit 0-3 = direzione
+    if (xDir < 0) state |= 0x1; // LEFT
+    if (xDir > 0) state |= 0x2; // RIGHT
+    if (yDir < 0) state |= 0x4; // UP
+    if (yDir > 0) state |= 0x8; // DOWN
+
+    // Bottoni (bit 4..)
+    int numButtons = SDL_JoystickNumButtons(g_Joystick);
+    for (int i = 0; i < numButtons && i < 24; i++) {
+        if (SDL_JoystickGetButton(g_Joystick, i)) {
+            state |= (1 << (4 + i));
+        }
+    }
+
+    return state;
+}
+
+void DXReadKeyboard(char* KeyMap)
+{
+    // Ottieni lo stato attuale della tastiera
+    const Uint8* state = SDL_GetKeyboardState(NULL);
+
+    // Copia i primi 256 tasti (come fa DirectInput)
+    for (int i = 0; i < 256; i++)
+    {
+        KeyMap[i] = state[i] ? 1 : 0;
+    }
+}
 
 const char* KeyboardButtons[272] =
 {

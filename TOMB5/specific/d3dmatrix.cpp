@@ -10,7 +10,7 @@ D3DMATRIX D3DInvCameraMatrix;
 
 static D3DMATRIX D3DMWorld;
 
-void SetD3DMatrix(D3DMATRIX* mx, float* imx)
+void SetD3DMatrix(D3DMATRIX* mx, const float* imx)
 {
 	D3DIdentityMatrix(mx);
 	mx->_11 = imx[M00];

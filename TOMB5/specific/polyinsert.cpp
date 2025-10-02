@@ -117,28 +117,6 @@ void DrawSortList()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		if ((SDL_Surface*)&App.dx.lpZBuffer)
-{
-    for (int i = 0; i < SortCount; i++)
-    {
-        pSort = SortList[i];
-        vtx = (D3DTLBUMPVERTEX*)(pSort + 1);
-
-        if (pSort->polytype == 4) {
-            // In Direct3D: D3DRENDERSTATE_TEXTUREPERSPECTIVE = 0
-            // In OpenGL: disabilita la correzione prospettica delle texture
-            glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-        }
-
-        HWR_DrawSortList(vtx, pSort->nVtx, pSort->tpage, pSort->drawtype);
-
-        if (pSort->polytype == 4) {
-            // Ripristina prospettiva normale
-            glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-        }
-    }
-}
-	else
 	{
 		pSort = SortList[0];
 

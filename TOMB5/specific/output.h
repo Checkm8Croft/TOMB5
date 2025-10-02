@@ -1,6 +1,6 @@
 #pragma once
 #include "../global/types.h"
-
+#include <SDL2/SDL.h>
 void S_DrawPickup(short object_number);
 void aTransformLightClipMesh(MESH_DATA* mesh);
 void aTransformLightPrelightClipMesh(MESH_DATA* mesh);
@@ -10,11 +10,11 @@ long S_GetObjectBounds(short* bounds);
 void S_AnimateTextures(long n);
 long aCheckMeshClip(MESH_DATA* mesh);
 HRESULT DDCopyBitmap(Surface surf, HBITMAP hbm, long x, long y, long dx, long dy);
-int _LoadBitmap(DrawDevice surf, const char* name);
+int _LoadBitmap(SDL_Surface* surf, const char* name);
 void do_boot_screen(long language);
 void aCalcColorSplit(long col, long* pC, long* pS);
-long S_DumpScreen();
-long S_DumpScreenFrame();
+HRESULT S_DumpScreen();
+HRESULT S_DumpScreenFrame();
 void StashSkinVertices(long node);
 void SkinVerticesToScratch(long node);
 void StashSkinNormals(long node);

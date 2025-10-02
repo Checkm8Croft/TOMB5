@@ -33,6 +33,7 @@
 
 D3DTLVERTEX aVertexBuffer[1024];
 
+
 long aGlobalSkinMesh;
 long GlobalAlpha = 0xFF000000;
 long GlobalAmbient;
@@ -1064,7 +1065,8 @@ int _LoadBitmap(SDL_Surface* surf, const char* name)
     return 0;
     return result;
 }
-
+int _LoadBitmap(SDL_Surface* surf, const char* name);
+SDL_Surface* surf = nullptr; 
 void do_boot_screen(long language)
 {
     Log(__FUNCTION__);
@@ -1086,9 +1088,9 @@ void do_boot_screen(long language)
 
     if (filename)
     {
-        _LoadBitmap(App.dx.lpBackBuffer, filename);
+        _LoadBitmap(surf, filename);
         S_DumpScreen();
-        _LoadBitmap(App.dx.lpBackBuffer, filename);
+        _LoadBitmap(surf, filename);
     }
 }
 
@@ -1161,7 +1163,7 @@ void aCalcColorSplit(long col, long* pC, long* pS)
 	*pS = RGBONLY(sR, sG, sB);
 }
 
-long S_DumpScreen()
+HRESULT S_DumpScreen()
 {
 	long n;
 
@@ -1175,12 +1177,11 @@ long S_DumpScreen()
 
 	GnFrameCounter++;
 	_EndScene();
-	DXShowFrame();
 	App.dx.DoneBlit = 1;
 	return n;
 }
 
-long S_DumpScreenFrame()
+HRESULT S_DumpScreenFrame()
 {
 	long n;
 
@@ -1194,7 +1195,6 @@ long S_DumpScreenFrame()
 
 	GnFrameCounter++;
 	_EndScene();
-	DXShowFrame();
 	App.dx.DoneBlit = 1;
 	return n;
 }
@@ -1304,10 +1304,7 @@ void SkinNormalsToScratch(long node)
 void S_InitialisePolyList()
 {
 	SDL_Rect r;
-	r.x = App.dx.rViewport.left;
-	r.y = App.dx.rViewport.top;
-	r.w = App.dx.rViewport.right - App.dx.rViewport.left;
-	r.h = App.dx.rViewport.bottom - App.dx.rViewport.top;
+
 
 	_BeginScene();
 	InitBuckets();
@@ -1322,7 +1319,6 @@ void S_OutputPolyList()
 	char buf[128];
 
 	WinFrameRate();
-	SDL_SetSurfaceBlendMode((SDL_Surface*)&App.dx.lpBackBuffer, SDL_BLENDMODE_BLEND);
 
 
 	if (resChangeCounter)
@@ -1335,29 +1331,17 @@ void S_OutputPolyList()
 			resChangeCounter = 0;
 	}
 
-	if ((SDL_Surface*)&App.dx.lpZBuffer)
-		DrawBuckets();
-
 	if (gfCurrentLevel == LVL5_TITLE)
 	{
 		Fade();
 
-		if ((SDL_Surface*)&App.dx.lpZBuffer)
-			DrawSortList();
+
 	}
 
 	SortPolyList(SortCount, SortList);
 	DrawSortList();
 
-	if ((SDL_Surface*)&App.dx.lpZBuffer)
-	{
-		SDL_Rect r;
-r.x = App.dx.rViewport.left;
-r.y = App.dx.rViewport.top;
-r.w = App.dx.rViewport.right - App.dx.rViewport.left;
-r.h = App.dx.rViewport.bottom - App.dx.rViewport.top;
 
-	}
 
 	if ((BinocularRange || SCOverlay || SniperOverlay) && !MonoScreenOn)
 	{
@@ -1673,22 +1657,11 @@ void phd_PutPolygonsSkyMesh(short* objptr, long clipstatus)
 				pTex->drawtype = 2;
 			else
 			{
-				if ((SDL_Surface*)&App.dx.lpZBuffer)
-				{
-					aVertexBuffer[quad[0]].color = 0;
-					aVertexBuffer[quad[1]].color = 0;
-					aVertexBuffer[quad[2]].color = 0xFF000000;
-					aVertexBuffer[quad[3]].color = 0xFF000000;
-					pTex->drawtype = 3;
-				}
-				else
-				{
 					aVertexBuffer[quad[0]].color = 0;
 					aVertexBuffer[quad[1]].color = 0;
 					aVertexBuffer[quad[2]].color = 0;
 					aVertexBuffer[quad[3]].color = 0;
 					pTex->drawtype = 0;
-				}
 			}
 		}
 		else

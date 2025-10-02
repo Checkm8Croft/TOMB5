@@ -26,6 +26,42 @@
 #include "pickup.h"
 #include "lara.h"
 #include "savegame.h"
+#include <SDL2/SDL_mixer.h>
+
+void S_SoundSetPanAndVolume(long num, short pan, unsigned short volume)
+{
+    if (num < 0 || num >= MAX_SOUNDS)
+        return;
+
+    // SDL2_mixer usa valori da 0 (sinistra) a 255 (destra)
+    Uint8 left = 255;
+    Uint8 right = 255;
+
+    if (pan < 0) pan = 0;
+    if (pan > 255) pan = 255;
+
+    left = 255 - pan;
+    right = pan;
+
+    Mix_SetPanning(num, left, right);
+
+    // SDL2_mixer volume da 0 a MIX_MAX_VOLUME (128)
+    int sdl_volume = (volume * MIX_MAX_VOLUME) / 255;
+    Mix_Volume(num, sdl_volume);
+}
+
+
+
+
+
+
+void S_SoundSetPitch(long num, long pitch)
+{
+    // SDL2_mixer non supporta il pitch nativamente
+    // quindi qui non facciamo nulla
+    (void)num;
+    (void)pitch;
+}
 
 void(*effect_routines[59])(ITEM_INFO* item) =
 {

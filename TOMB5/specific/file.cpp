@@ -36,6 +36,35 @@
 #include "drawbars.h"
 #include "../tomb5/tomb5.h"
 #include <string.h>
+#include <SDL2/SDL_mixer.h>
+#include "fmv.h"
+bool DXCreateSampleADPCM(char* data, long comp_size, long uncomp_size, long num)
+{
+    if (num < 0 || num >= MAX_SOUNDS) return false;
+
+    // Se il chunk esiste già, liberalo
+    if (g_Sounds[num]) {
+        Mix_FreeChunk(g_Sounds[num]);
+        g_Sounds[num] = nullptr;
+    }
+
+    // Crea un Mix_Chunk dai dati (raw PCM)
+    Mix_Chunk* chunk = (Mix_Chunk*)SDL_malloc(sizeof(Mix_Chunk));
+    if (!chunk) return false;
+
+    chunk->allocated = 1; // SDL deve liberare i dati
+    chunk->alen = uncomp_size;
+    chunk->abuf = (Uint8*)SDL_malloc(uncomp_size);
+    if (!chunk->abuf) {
+        SDL_free(chunk);
+        return false;
+    }
+
+    SDL_memcpy(chunk->abuf, data, uncomp_size);
+    g_Sounds[num] = chunk;
+
+    return true;
+}
 
 TEXTURESTRUCT* textinfo;
 SPRITESTRUCT* spriteinfo;
@@ -51,7 +80,6 @@ short* mesh_base;
 long number_cameras;
 long nAnimUVRanges;
 short nAIObjects;
-
 TEXTURESTRUCT* AnimatingWaterfalls[6];
 float AnimatingWaterfallsV[6];
 
@@ -62,7 +90,16 @@ static char* CompressedData;
 static float MonitorScreenU;
 static long FileCompressed = 1;
 
+void DXFreeSounds(){
+	     // Ferma tutti i canali audio
+    Mix_HaltChannel(-1);
 
+    // Opzionale: resetta il mixer (non cancella i chunk caricati se non li tieni)
+    Mix_CloseAudio();
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048); // riapri se serve
+}
+
+	
 static char ReadChar()
 {
 	char read;
@@ -340,7 +377,6 @@ void DoMonitorScreen()
 		pos += 128;
 	}
 }
-
 void S_GetUVRotateTextures()
 {
 	TEXTURESTRUCT* tex;
@@ -388,7 +424,6 @@ bool LoadTextures(long RTPages, long OTPages, long BTPages)
 	nTextures = 1;
 	format = 0;
 	skip = 4;
-	dxtex = &G_dxinfo->DDInfo[G_dxinfo->nDD].D3DDevices[G_dxinfo->nD3D].TextureInfos[G_dxinfo->nTexture];
 
 	if (dxtex->rbpp == 8 && dxtex->gbpp == 8 && dxtex->bbpp == 8 && dxtex->abpp == 8)
 		format = 1;

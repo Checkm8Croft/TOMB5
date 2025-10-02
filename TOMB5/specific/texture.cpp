@@ -19,6 +19,9 @@
 #include <GL/gl.h>
 #endif
 
+long nTextures = 256;
+
+
 // Assunzione: `Surface` è un tipo compatibile con un puntatore/integer.
 // Per conservare compatibilità col resto del codice, ritorniamo l'ID OpenGL
 // incapsulato in Surface (cast tramite uintptr_t).

@@ -31,6 +31,7 @@
 #include "lara.h"
 #include "cutseq.h"
 #include "../tomb5/tomb5.h"
+#include <SDL2/SDL_mixer.h>
 
 GAMEFLOW* Gameflow;
 PHD_VECTOR gfLensFlare;

@@ -16,7 +16,6 @@ void DrawBucket(TEXTUREBUCKET* bucket);
 void DrawBuckets();
 void FindBucket(long tpage, D3DTLBUMPVERTEX** Vpp, long** nVtxpp);
 long CheckBoundsClip(float* box);
-
 extern FOGBULB_STRUCT ActiveFogBulbs[64];
 extern FOGBULB_STRUCT FogBulbs[16];
 extern short CheckClipBox[8 * 3];

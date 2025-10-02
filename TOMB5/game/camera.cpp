@@ -41,7 +41,7 @@ char SniperCamActive = 0;
 static char SniperCount = 0;
 
 uchar WeaponDelay = 0;
-
+long XATrack = 0;
 static long bLaraTorch;
 
 static OLD_CAMERA old_cam;

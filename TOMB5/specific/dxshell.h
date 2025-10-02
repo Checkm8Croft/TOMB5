@@ -1,6 +1,7 @@
 #pragma once
 #include "../global/types.h"
 
+
 // Fix DirectX/Win32 su macOS/Linux
 #ifndef _WIN32
     typedef void* LPVOID;
@@ -29,7 +30,6 @@
     #define __stdcall
     #endif
 #endif
-
 void DXReadKeyboard(char* KeyMap);
 void DXBitMask2ShiftCnt(ulong mask, uchar* shift, uchar* count);
 long DXAttempt(HRESULT r);
@@ -45,7 +45,7 @@ long BPPToDDBD(long BPP);
 long DXCreateD3DDevice(D3DInterface d3d, GUID guid, Surface surf, GLuint device);
 long DXSetVideoMode(DrawDevice dd, long dwWidth, long dwHeight, long dwBPP);
 long DXCreateSurface(DrawDevice dd, SurfaceDesc desc, Surface* surf);
-long DXCreateViewport(D3DInterface d3d, GLuint device, long w, long h, Viewport* viewport);
+long DXCreateViewport(D3DInterface d3d, GLuint device, long w, long h);
 void DXSaveScreen(Surface surf, const char* name);
 HRESULT DXShowFrame();
 void DXMove(long x, long y);
@@ -65,7 +65,6 @@ const char* DXGetErrorString(HRESULT hr);
 const char* DIGetErrorString(HRESULT hr);
 
 extern DXPTR* G_dxptr;
-extern DXINFO* G_dxinfo;
 extern DrawDevice G_ddraw;
 extern D3DInterface G_d3d;
 extern HWindow G_hwnd;

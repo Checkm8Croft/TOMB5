@@ -34,11 +34,13 @@
 #include <unistd.h>
 #include <errno.h>
 
+bool start_setup = false;
 #define KA_ALTENTER 1
 #define KA_ALTP     2
 #define KA_ALTM     3
 WINAPP App;
 long resChangeCounter;
+bool SetupDialog = false;
 
 static COMMANDLINES commandlines[] =
 {
@@ -87,21 +89,14 @@ void WinRunRelease(int mutex)
 // ------------------ CLEAR SURFACES ------------------
 void ClearSurfaces()
 {
-    int x = (int)App.dx.rViewport.left;
-    int y = (int)App.dx.rViewport.top;
-    int w = (int)App.dx.rViewport.right;
-    int h = (int)App.dx.rViewport.bottom;
 
-    if (w <= 0 || h <= 0) return;
+
 
     int winH = (App.dx.dwRenderHeight > 0) ? (int)App.dx.dwRenderHeight
                                            : (int)(App.dx.rScreen.top + App.dx.rScreen.bottom);
 
-    int scissorY = winH - (y + h);
-    if (scissorY < 0) scissorY = 0;
 
     glEnable(GL_SCISSOR_TEST);
-    glScissor(x, scissorY, w, h);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_SCISSOR_TEST);
 
@@ -268,7 +263,7 @@ int main(int argc, char** argv)
 
     if (start_setup || !LoadSettings())
     {
-        if (!SetupDialog())
+        if (!SetupDialog)
         {
             free(gfScriptFile);
             free(gfLanguageFile);
@@ -279,7 +274,7 @@ int main(int argc, char** argv)
         LoadSettings();
     }
 
-    if (!fmvs_disabled && !LoadBinkStuff())
+    if (!fmvs_disabled)
     {
         printf("Failed to load Bink, disabling FMVs.\n");
         fmvs_disabled = 1;

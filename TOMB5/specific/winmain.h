@@ -9,7 +9,7 @@ void WinProcMsg();
 void WinProcessCommands(long cmd);
 void CLSetup(char* cmd);
 void CLNoFMV(char* cmd);
-void WinProcessCommandLine(LPSTR cmd);
+void WinProcessCommandLine(const char* cmdline);
 long WinMainWndProc(SDL_Window*, uint32_t uMsg, uint32_t wParam, uint32_t lParam);
 void WinClose();
 bool WinRegisterWindow(HInstance hinstance);

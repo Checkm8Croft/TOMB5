@@ -21,7 +21,6 @@
 #include "lara.h"
 
 TWOGUN_INFO twogun[4];
-
 static BITE_INFO Guns[2] =
 {
 	{ 0, 230, 40, 8 },

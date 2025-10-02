@@ -25,7 +25,7 @@ FOGBULB_STRUCT FXFogBulbs[4];		//list of fx fog bulbs
 FOGBULB_STRUCT FogBulbs[16];		//to apply on object vertices	
 FOGBULB_STRUCT RoomletFogBulbs[16];	//to apply on roomlet vertices
 short CheckClipBox[8 * 3] = { 0, 1, 2, 3, 1, 2, 0, 1, 5, 3, 1, 5, 0, 4, 2, 3, 4, 2, 0, 4, 5, 3, 4, 5 };
-
+TEXTURE Textures[64];
 MESH_DATA** mesh_vtxbuf;
 TEXTUREBUCKET Bucket[30];
 float clip_left;

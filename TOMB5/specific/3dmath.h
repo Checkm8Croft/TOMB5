@@ -18,7 +18,7 @@ void ScaleCurrentMatrix(PHD_VECTOR* vec);
 void phd_GetVectorAngles(long x, long y, long z, short* angles);
 void phd_GenerateW2V(PHD_3DPOS* viewPos);
 void phd_LookAt(long xsrc, long ysrc, long zsec, long xtar, long ytar, long ztar, short roll);
-
+void SetViewMatrix(Matrix4x4* mat);
 void SetupZRange(long znear, long zfar);
 void InitWindow(long x, long y, long w, long h, long znear, long zfar, long fov, long a, long b);
 long phd_atan(long x, long y);
