@@ -122,13 +122,13 @@ long PlayFmv(long num)
 	dm = App.DXInfo.nDisplayMode;
 	current = &modes[dm];
 
-	if (current->bpp != 16 || current->w != 640 || current->h != 480)
+	if (current->bpp != 32 || current->w != 640 || current->h != 480)
 	{
 		ndms = G_dxinfo->DDInfo[G_dxinfo->nDD].D3DDevices[G_dxinfo->nD3D].nDisplayModes;
 
 		for (int i = 0; i < ndms; i++, modes++)
 		{
-			if (modes->bpp == 16 && modes->w == 640 && modes->h == 480)
+			if (modes->bpp == 32 && modes->w == 640 && modes->h == 480)
 			{
 				App.DXInfo.nDisplayMode = i;
 				break;
